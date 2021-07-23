@@ -156,10 +156,10 @@ library(tidyr)
 sdata=set %>%
   #filter(!(studies == "highly diversified coronaviruses in neotropical bats")) %>%
    dplyr::select(studies, species, country, state, site, longitude, latitude, sample_year, start_year, sample) %>%
-   distinct() %>% 
-  group_by(species) %>%
+  dplyr::distinct() %>% 
+  dplyr::group_by(species) %>%
    dplyr::summarize(tested = sum(sample),
-            nstudies = n_distinct(studies)) 
+            nstudies = dplyr::n_distinct(studies)) 
 adata=data.frame(sdata)
 
 ## number of studies
@@ -180,6 +180,7 @@ sdata=data.frame(studies=sdata,
 ## test merge
 test=merge(adata,sdata,by="species")
 plot(test$studies,test$nstudies)
+cor(test$studies,test$nstudies)
 abline(0,1)
 
 ## all species
@@ -204,6 +205,43 @@ sdata=merge(sdata,taxa,by="species")
 
 ## which is weird
 sdata$odd=ifelse(tree$tip.label==sdata$species,1,0)
+
+## get betacov ensemble propranks from 2020
+setwd("~/Desktop/Fresnel_Jun/Cleaned Files_2020")
+batin=read.csv("BatModels_IS.csv")
+batout=read.csv("BatModels_OS.csv")
+
+## remove odd rows
+batout$fix=as.numeric(batout$Sp)
+batout=batout[is.na(batout$fix),]
+batout=batout[!is.na(batout$Sp),]
+
+## combine
+batold=rbind.data.frame(batin[intersect(names(batin),names(batout))],
+                        batout[intersect(names(batin),names(batout))])
+batold=batold[c("Sp","Betacov","PropRank","InSample")]
+
+## clean
+rm(batin,batout)
+
+## fix names
+batold$species=batold$Sp
+batold=batold[c("species","PropRank","Betacov")]
+
+## initial merge
+test=merge(sdata,batold,by="species",all=T)
+
+## plot proprank and studies
+ggplot(test,aes(PropRank,studies))+
+  geom_point(alpha=0.5,
+             aes(colour=factor(Betacov)))+
+  geom_smooth(method="glm",
+              method.args=list(family=poisson))+
+  theme_bw()+
+  guides(colour=F)+
+  scale_colour_manual(values=c("grey","red"))+
+  labs(x="proportional ranks for bat betacoronavirus hosts",
+       y="number of CoV studies per bat species")
 
 ## merge
 sdata$tip=sdata$species
