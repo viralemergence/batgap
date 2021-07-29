@@ -21,7 +21,7 @@ setwd("~/Desktop/batgap/data")
 data=read.csv("Prevalence-Grid view.csv")
 
 ## ## load in Upham phylogeny
-setwd("~/Desktop/BeckerLabOU/phylos")
+setwd("~/Desktop/batgap/phylos")
 tree=read.nexus('MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre')
 
 ## load in taxonomy
