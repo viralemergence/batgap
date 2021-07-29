@@ -151,6 +151,53 @@ set=data[data$species%in%tree$tip.label,]
 set$species=factor(set$species)
 set$studies=factor(set$Field.25)
 
+## trim tree to species in set
+stree=keep.tip(tree,as.character(unique(set$species)))
+
+## convert tree to correlation matrix
+cmatrix=vcv.phylo(stree,cor=T)
+
+## make observation and study-level random effect
+set$observation=factor(1:nrow(set))
+set$study=factor(set$Field.25)
+
+## pft in escalc for yi and vi 
+set=data.frame(set,escalc(xi=set$positives,ni=set$sample,measure="PFT"))
+
+## back transform
+set$backtrans=transf.ipft(set$yi,set$sample)
+
+## check
+plot(set$prevalence,set$backtrans)
+abline(0,1)
+
+## species and phylo effect
+set$phylo=set$species
+set$species=set$phylo
+
+## function for I2 for rma.mv
+i2=function(model){
+  
+  ## metafor site code for I2
+  W=diag(1/model$vi)
+  X=model.matrix(model)
+  P=W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
+  I2=100 * sum(model$sigma2) / (sum(model$sigma2) + (model$k-model$p)/sum(diag(P)))
+  I2=round(I2,2)
+  
+  ## summarize by each variance component
+  allI2=100 * model$sigma2 / (sum(model$sigma2) + (model$k-model$p)/sum(diag(P)))
+  allI2=round(allI2,3)
+  return(list(I2=I2,allI2=allI2))
+}
+
+## model with no covariates
+model=rma.mv(yi=yi,V=vi,
+             random=list(~1|study/observation,~1|species,~1|phylo),
+             R=list(phylo=cmatrix),
+             method="REML",mods=~1,data=set,
+             control=list(optimizer="optim", optmethod="BFGS"))
+
 ## aggregate to sampled bats
 library(tidyr)
 sdata=set %>%
@@ -390,7 +437,7 @@ obj.fcn2 <- function(fit,grp,tree,PartitioningVariables,model.fcn,phyloData,...)
 mean(cdata$data$studies)
 var(cdata$data$studies)
 
-## testedL poisson or nb
+## tested: poisson or nb
 mean(cdata$data$tested)
 var(cdata$data$tested)
 
@@ -402,8 +449,7 @@ study_pf=gpf(Data=cdata$data,tree=cdata$phy,
              frmla.phylo=studies~phylo,
              model.fcn = model.fcn2,objective.fcn = obj.fcn2,
              cluster.depends='library(MASS)',
-             algorithm='phylo',nfactors=15,
-             min.group.size=10)
+             algorithm='phylo',nfactors=15)
 
 ## summarize
 HolmProcedure(study_pf)
@@ -415,8 +461,7 @@ tested_pf=gpf(Data=cdata$data,tree=cdata$phy,
              frmla.phylo=tested~phylo,
              model.fcn = model.fcn2,objective.fcn = obj.fcn2,
              cluster.depends='library(MASS)',
-             algorithm='phylo',nfactors=15,
-             min.group.size=5)
+             algorithm='phylo',nfactors=15)
 
 ## summarize
 HolmProcedure(tested_pf)
