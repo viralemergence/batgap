@@ -18,7 +18,10 @@ library(reshape2)
 
 ## load data manual
 setwd("~/Desktop/batgap/data")
-data=read.csv("Prevalence-Grid view.csv")
+data=read.csv("batdata.csv")
+
+## exclude row 98 (incorrect data)
+data=data[-98,]
 
 ## ## load in Upham phylogeny
 setwd("~/Desktop/batgap/phylos")
@@ -161,6 +164,38 @@ cmatrix=vcv.phylo(stree,cor=T)
 set$observation=factor(1:nrow(set))
 set$study=factor(set$Field.25)
 
+## names of viral genera that aren't strictly alpha or beta
+vnames=c("alphacoronavirus or betacoronavirus or gammacoronavirus",
+         "alphacoronavirus or betacoronavirus",
+         "alphacoronavirus or betacoronavirus or gammacoronavirus or deltacoronavirus",
+         "?",
+         "alphacoronavirus/betacoronavirus coinfection",
+         "alphacoronavirus and betacoronavirus",
+         "alphacoronavirus and betacoronavirus and independent bat coronavirus",
+         "independent bat coronavirus")
+
+## flag as alphaCoV
+set$alpha=ifelse(set$virus_genus%in%c("alphacoronavirus",
+                                      "alphacoronavirus/alphacoronavirus coinfection"),1,0)
+
+## count any zeros using general detection as alpha-negative
+set$alpha=ifelse(set$positives==0 & set$virus_genus%in%vnames,1,set$alpha)
+
+## repeat with beta
+set$beta=ifelse(set$virus_genus%in%c("betacoronavirus","betacoronavirus "),1,0)
+set$beta=ifelse(set$positives==0 & set$virus_genus%in%vnames,1,set$beta)
+
+## check
+cset=set[c("virus_genus","positives","sample","alpha","beta")]
+
+## make positive columns for alpha and beta
+set$positives_alpha=ifelse(set$alpha==1,set$positives,NA)
+set$positives_beta=ifelse(set$beta==1,set$positives,NA)
+
+## make sample columns for alpha and beta
+set$sample_alpha=ifelse(set$alpha==1,set$sample,NA)
+set$sample_beta=ifelse(set$beta==1,set$sample,NA)
+
 ## pft in escalc for yi and vi 
 set=data.frame(set,escalc(xi=set$positives,ni=set$sample,measure="PFT"))
 
@@ -170,6 +205,17 @@ set$backtrans=transf.ipft(set$yi,set$sample)
 ## check
 plot(set$prevalence,set$backtrans)
 abline(0,1)
+
+## make alpha and beta yi and vi
+alpha_es=escalc(xi=set$positives_alpha,ni=set$sample_alpha,measure="PFT")
+beta_es=escalc(xi=set$positives_beta,ni=set$sample_beta,measure="PFT")
+
+## append names
+names(alpha_es)=paste(names(alpha_es),"_alpha",sep="")
+names(beta_es)=paste(names(beta_es),"_beta",sep="")
+
+## cbind
+set=data.frame(set,alpha_es,beta_es)
 
 ## species and phylo effect
 set$phylo=set$species
