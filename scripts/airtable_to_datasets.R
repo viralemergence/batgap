@@ -303,7 +303,7 @@ which(data$spec==2)
 data$bat_species[which(data$spec==2)]
 #only "Peking Myotis, Myotis pequinius" + pooled rhinopholus + myotis species - fixed below 
 
-#fix bats for dataset being given to reader (e.g. rows with only genus-level info are kept)
+#fix bats for dataset being given to reader (e.g. rows with only genus-level info are kept) - not for use in analyses
 data$species_for_reader=data$bat_species
 #species not in phylogeny, not enough info (e.g. Insectivorous bats) -> Drop 
 data$species_for_reader=revalue(data$species_for_reader,
@@ -470,30 +470,68 @@ set_infection_prev_betaonly <- set_infection_prev[which(set_infection_prev$virus
 set_other_alphaonly <- set_other[which(set_other$virus_genus=="alphacoronavirus" | set_other$virus_genus=="alphacoronavirus/alphacoronavirus coinfection"),,] 
 set_other_betaonly <- set_other[which(set_other$virus_genus=="betacoronavirus"),,]
 
-#infection prevalence all coronaviruses
+#infection prevalence analyses
 ## trim tree to species in set
-stree=keep.tip(tree,as.character(unique(set_infection_prev$species)))
+stree1=keep.tip(tree,as.character(unique(set_infection_prev$species)))
+stree2=keep.tip(tree,as.character(unique(set_infection_prev_alphaonly$species)))
+stree3=keep.tip(tree,as.character(unique(set_infection_prev_betaonly$species)))
 
 ## convert tree to correlation matrix
-cmatrix=vcv.phylo(stree,cor=T)
+#all genera
+cmatrix1=vcv.phylo(stree1,cor=T)
+#alpha only
+cmatrix2=vcv.phylo(stree2,cor=T)
+#beta only
+cmatrix3=vcv.phylo(stree3,cor=T)
 
 ## make observation and study-level random effect
+#all genera
 set_infection_prev$observation=factor(1:nrow(set_infection_prev))
 set_infection_prev$study=factor(set_infection_prev$title)
+#alpha only
+set_infection_prev_alphaonly$observation=factor(1:nrow(set_infection_prev_alphaonly))
+set_infection_prev_alphaonly$study=factor(set_infection_prev_alphaonly$title)
+#beta only
+set_infection_prev_betaonly$observation=factor(1:nrow(set_infection_prev_betaonly))
+set_infection_prev_betaonly$study=factor(set_infection_prev_betaonly$title)
 
 ## pft in escalc for yi and vi 
+#all genera
 set_infection_prev=data.frame(set_infection_prev,escalc(xi=set_infection_prev$positives,ni=set_infection_prev$sample,measure="PFT"))
+#alpha only
+set_infection_prev_alphaonly=data.frame(set_infection_prev_alphaonly,escalc(xi=set_infection_prev_alphaonly$positives,ni=set_infection_prev_alphaonly$sample,measure="PFT"))
+#beta only
+set_infection_prev_betaonly=data.frame(set_infection_prev_betaonly,escalc(xi=set_infection_prev_betaonly$positives,ni=set_infection_prev_betaonly$sample,measure="PFT"))
 
 ## back transform
+#all genera
 set_infection_prev$backtrans=transf.ipft(set_infection_prev$yi,set_infection_prev$sample)
+#alpha only
+set_infection_prev_alphaonly$backtrans=transf.ipft(set_infection_prev_alphaonly$yi,set_infection_prev_alphaonly$sample)
+#beta only
+set_infection_prev_betaonly$backtrans=transf.ipft(set_infection_prev_betaonly$yi,set_infection_prev_betaonly$sample)
 
 ## check
+#all genera
 plot(set_infection_prev$prevalence,set_infection_prev$backtrans)
+abline(0,1)
+#alpha only
+plot(set_infection_prev_alphaonly$prevalence,set_infection_prev_alphaonly$backtrans)
+abline(0,1)
+#beta only
+plot(set_infection_prev_betaonly$prevalence,set_infection_prev_betaonly$backtrans)
 abline(0,1)
 
 ## species and phylo effect
+#all genera
 set_infection_prev$phylo=set_infection_prev$species
 set_infection_prev$species=set_infection_prev$phylo
+#alpha only
+set_infection_prev_alphaonly$phylo=set_infection_prev_alphaonly$species
+set_infection_prev_alphaonly$species=set_infection_prev_alphaonly$phylo
+#beta only
+set_infection_prev_betaonly$phylo=set_infection_prev_betaonly$species
+set_infection_prev_betaonly$species=set_infection_prev_betaonly$phylo
 
 ## function for I2 for rma.mv
 i2=function(model){
@@ -512,21 +550,36 @@ i2=function(model){
 }
 
 ##add column for bat family 
+#all genera
 set_infection_prev$species_char <- as.character(set_infection_prev$species)
-
 which(taxa$species==set_infection_prev$species_char[1])
-
 data_fam <- data.frame(family = taxa$fam[986])
-
 nrow(set_infection_prev)
 for(i in 2:2281) {
   new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev$species_char[i])])
   data_fam <- rbind(data_fam, new_row)
 }
-
 set_infection_prev <- cbind(set_infection_prev, data_fam)
-
-
+#alpha only
+set_infection_prev_alphaonly$species_char <- as.character(set_infection_prev_alphaonly$species)
+which(taxa$species==set_infection_prev_alphaonly$species_char[1])
+data_fam <- data.frame(family = taxa$fam[986])
+nrow(set_infection_prev_alphaonly)
+for(i in 2:439) {
+  new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev_alphaonly$species_char[i])])
+  data_fam <- rbind(data_fam, new_row)
+}
+set_infection_prev_alphaonly <- cbind(set_infection_prev_alphaonly, data_fam)
+#beta only
+set_infection_prev_betaonly$species_char <- as.character(set_infection_prev_betaonly$species)
+which(taxa$species==set_infection_prev_betaonly$species_char[1])
+data_fam <- data.frame(family = taxa$fam[986])
+nrow(set_infection_prev_betaonly)
+for(i in 2:361) {
+  new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev_betaonly$species_char[i])])
+  data_fam <- rbind(data_fam, new_row)
+}
+set_infection_prev_betaonly <- cbind(set_infection_prev_betaonly, data_fam)
 
 #export to github desktop folder
 #reader
