@@ -80,7 +80,7 @@ data$tissue_simplified<-revalue(data$tissue_simplified,
                                   "oral swab,rectal swab"="pooled swabs/samples",
                                   "respiratory/fecal swab"="pooled swabs/samples",
                                   "oral swab,fecal swab"="pooled swabs/samples"))
-
+unique(data$tissue_simplified)
 unique(data$country)
 data$country <- revalue(data$country, c("?"="NA"))
 
@@ -276,7 +276,7 @@ unique(data$method_specific_simplified)
 tree <- read.nexus("MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre")
 
 ## load in taxonomy from github: batgap/phylos/
-taxa=read.csv('~/Desktop/VERENA/batgap/taxonomy_mamPhy_5911species.csv',header=T)
+taxa=read.csv('taxonomy_mamPhy_5911species.csv',header=T)
 taxa=taxa[taxa$ord=="CHIROPTERA",]
 taxa$tip=taxa$Species_Name
 taxa$tip <- as.character(taxa$tip)
@@ -296,8 +296,7 @@ setdiff(data$bat_species,tree$tip)
 ## multiple species?
 data$spec=sapply(strsplit(data$bat_species,","),function(x) length(x))
 which(data$spec==2)
-data$bat_species[1173]
-#only "Peking Myotis, Myotis pequinius" - fixed below 
+#only "Peking Myotis, Myotis pequinius" + pooled rhinopholus species - fixed below 
 
 #fix bats for dataset being given to reader (e.g. rows with only genus-level info are kept)
 data$species_for_reader=data$bat_species
@@ -432,7 +431,8 @@ data$species_for_reader=revalue(data$species_for_reader,
                        "Glossophaga comissarisi"="Glossophaga commissarisi",
                        "Eptesicus furnalis"="Eptesicus furinalis",
                        "Miniopterus sp."="Miniopterus",
-                       "Scotoecus sp."="Miniopterus"))
+                       "Scotoecus sp."="Miniopterus",
+                       "Rhinolophus sinicus,Rhinolophus ferrumequinum"="Rhinolophus"))
 
 ## check
 unique(data$species_for_reader)
