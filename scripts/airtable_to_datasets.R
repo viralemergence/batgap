@@ -16,7 +16,7 @@ library(cowplot)
 ##set working directory 
 setwd("~/Documents/GitHub/batgap/data")
 
-##Airtable as of April 12, 2022
+##Airtable as of April 13, 2022
 data <- read.csv("airtable.csv")
 
 #add column with simplified tissues
@@ -272,10 +272,14 @@ data$method_specific_simplified <- data$method_specific
 data$method_specific_simplified <- revalue(data$method_specific_simplified, c("Lateral flow immunoassay"="Lateral Flow Immunoassay","broadly reactive heminested RT-PCR"="PCR","hemi-nested RT-PCR"="PCR","RT-PCR"="PCR","RT-PCR,nested RT-PCR"="PCR","semi-nested RT-PCR"="PCR","nested RT-PCR"="PCR","nested PCR"="PCR","end point PCR"="PCR","RT-PCR,hemi-nested PCR"="PCR","consensus RT-PCR"="PCR","consensus nested-PCR"="PCR","\"SARS coronavirus crude antigen ELISA (Yu, 2008)\""="ELISA","double heminested RT-PCR"="PCR","rtRT-PCR"="PCR","RT-PCR,semi-nested RT-PCR,nested RT-PCR"="PCR","broadly reactive nested RT-PCR"="PCR","pancoronavirus Nested PCR"="PCR","pancoronavirus nested RT-PCR"="PCR","degenerate concensus PCR"="PCR","nested RT-PCR,semi-nested RT-PCR"="PCR","Enzyme immunoassay"="ELISA","RT-qPCR,semi-nested PCR"="PCR","pancoronavirus RT-PCR"="PCR"))
 unique(data$method_specific_simplified)
 
-##load in Upham phylogeny from github: batgap/phylos/
+#check virus genera data
+unique(data$virus_genus)
+data$virus_genus[which(data$virus_genus=="betacoronavirus ")] <- "betacoronavirus"
+
+##load in Upham phylogeny
 tree <- read.nexus("MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre")
 
-## load in taxonomy from github: batgap/phylos/
+## load in taxonomy
 taxa=read.csv('taxonomy_mamPhy_5911species.csv',header=T)
 taxa=taxa[taxa$ord=="CHIROPTERA",]
 taxa$tip=taxa$Species_Name
@@ -296,7 +300,8 @@ setdiff(data$bat_species,tree$tip)
 ## multiple species?
 data$spec=sapply(strsplit(data$bat_species,","),function(x) length(x))
 which(data$spec==2)
-#only "Peking Myotis, Myotis pequinius" + pooled rhinopholus species - fixed below 
+data$bat_species[which(data$spec==2)]
+#only "Peking Myotis, Myotis pequinius" + pooled rhinopholus + myotis species - fixed below 
 
 #fix bats for dataset being given to reader (e.g. rows with only genus-level info are kept)
 data$species_for_reader=data$bat_species
@@ -432,20 +437,21 @@ data$species_for_reader=revalue(data$species_for_reader,
                        "Eptesicus furnalis"="Eptesicus furinalis",
                        "Miniopterus sp."="Miniopterus",
                        "Scotoecus sp."="Miniopterus",
-                       "Rhinolophus sinicus,Rhinolophus ferrumequinum"="Rhinolophus"))
+                       "Rhinolophus sinicus,Rhinolophus ferrumequinum"="Rhinolophus",
+                       "Myotis aurascens Kuzyakin,Myotis petax"="Myotis",
+                       "(multiple) species of horseshoe bat"="Rhinolophus"))
 
 ## check
 unique(data$species_for_reader)
 data_for_reader <- data
 
-
-#remove genus-only rows for analyses/trim dataset to only phylogeny 
+#remove genus-only/drop rows for analyses (trim dataset to only phylogeny) 
 setdiff(data$species_for_reader,tree$tip)
 set=data[data$species_for_reader%in%tree$tip.label,,]
 set$species=factor(set$species_for_reader)
 set$studies=factor(set$title)
 
-###two datasets: 
+###genus-level coronavirus datasets: 
 #1) infection prevalence analyses (antibody + IHC rows removed, flagged rows removed)
 set_infection_prev <- set[which(set$detection_method!= "IHC" | set$detection_method!="antibody"),,]
 set_infection_prev <- set_infection_prev[which(set_infection_prev$Flag=="only use these two rows for prevalence estimates" | set_infection_prev$Flag==""),,]
@@ -454,6 +460,17 @@ set_infection_prev <- set_infection_prev[which(set_infection_prev$Flag=="only us
 #2) other analyses (two rows only for prevalence have been removed)
 set_other <- set[which(set$Flag=="" | set$Flag=="include rows for taxonomic/geographic patterns in yes/no sampled and yes/no positive but NOT in prevalence analyses because denominators correspond to region and not species" | set$Flag=="airtable double counts by including study table 1 (ID 1120-1122)+ table 2 (ID 2945-2956): study included in binary analyses but not prevalence estimates"),,]
 
+###alpha-only and beta-only datasets:
+#1) infection prevalence analyses
+unique(set_infection_prev$virus_genus)
+set_infection_prev_alphaonly <- set_infection_prev[which(set_infection_prev$virus_genus=="alphacoronavirus" | set_infection_prev$virus_genus=="alphacoronavirus/alphacoronavirus coinfection"),,] 
+set_infection_prev_betaonly <- set_infection_prev[which(set_infection_prev$virus_genus=="betacoronavirus"),,]
+
+#2) other analyses
+set_other_alphaonly <- set_other[which(set_other$virus_genus=="alphacoronavirus" | set_other$virus_genus=="alphacoronavirus/alphacoronavirus coinfection"),,] 
+set_other_betaonly <- set_other[which(set_other$virus_genus=="betacoronavirus"),,]
+
+#infection prevalence all coronaviruses
 ## trim tree to species in set
 stree=keep.tip(tree,as.character(unique(set_infection_prev$species)))
 
@@ -516,8 +533,14 @@ set_infection_prev <- cbind(set_infection_prev, data_fam)
 write.csv(data_for_reader,"~/Documents/GitHub/batgap/data/data_for_reader.csv")
 #infection prevalence
 write.csv(set_infection_prev,"~/Documents/GitHub/batgap/data/set_infection_prevalence.csv")
+write.csv(set_infection_prev_alphaonly,"~/Documents/GitHub/batgap/data/set_infection_prevalence_alphaonly.csv")
+write.csv(set_infection_prev_betaonly,"~/Documents/GitHub/batgap/data/set_infection_prevalence_betaonly.csv")
 #other analyses
 write.csv(set_other,"~/Documents/GitHub/batgap/data/set_other.csv")
+write.csv(set_other_alphaonly,"~/Documents/GitHub/batgap/data/set_other_alphaonly.csv")
+write.csv(set_other_betaonly,"~/Documents/GitHub/batgap/data/set_other_betaonly.csv")
+
+
 
 #ready for models
 
