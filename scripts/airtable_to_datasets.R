@@ -14,9 +14,9 @@ library(reshape2)
 library(cowplot)
 
 ##set working directory 
-setwd("~/Desktop") 
+setwd("~/Documents/GitHub/batgap/data")
 
-##load data (download from airtable)
+##Airtable as of April 12, 2022
 data <- read.csv("airtable.csv")
 
 #add column with simplified tissues
@@ -273,7 +273,7 @@ data$method_specific_simplified <- revalue(data$method_specific_simplified, c("L
 unique(data$method_specific_simplified)
 
 ##load in Upham phylogeny from github: batgap/phylos/
-tree <- read.nexus("~/Desktop/VERENA/batgap/MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre")
+tree <- read.nexus("MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre")
 
 ## load in taxonomy from github: batgap/phylos/
 taxa=read.csv('~/Desktop/VERENA/batgap/taxonomy_mamPhy_5911species.csv',header=T)
@@ -436,9 +436,8 @@ data$species_for_reader=revalue(data$species_for_reader,
 
 ## check
 unique(data$species_for_reader)
+data_for_reader <- data
 
-
-#^dataset for reader = "data"
 
 #remove genus-only rows for analyses/trim dataset to only phylogeny 
 setdiff(data$species_for_reader,tree$tip)
@@ -509,6 +508,16 @@ for(i in 2:2281) {
 }
 
 set_infection_prev <- cbind(set_infection_prev, data_fam)
+
+
+
+#export to github desktop folder
+#reader
+write.csv(data_for_reader,"~/Documents/GitHub/batgap/data/data_for_reader.csv")
+#infection prevalence
+write.csv(set_infection_prev,"~/Documents/GitHub/batgap/data/set_infection_prevalence.csv")
+#other analyses
+write.csv(set_other,"~/Documents/GitHub/batgap/data/set_other.csv")
 
 #ready for models
 
