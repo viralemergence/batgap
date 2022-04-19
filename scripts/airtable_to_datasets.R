@@ -453,8 +453,9 @@ set$studies=factor(set$title)
 
 ###genus-level coronavirus datasets: 
 #1) infection prevalence analyses (antibody + IHC rows removed, flagged rows removed)
-set_infection_prev <- set[which(set$detection_method!= "IHC" | set$detection_method!="antibody"),,]
+set_infection_prev <- set[-which(set$detection_method== "IHC" | set$detection_method=="antibody"),,]
 set_infection_prev <- set_infection_prev[which(set_infection_prev$Flag=="only use these two rows for prevalence estimates" | set_infection_prev$Flag==""),,]
+unique(set_infection_prev$detection_method)
 #^dataset for prevalence estimates
 
 #2) other analyses (two rows only for prevalence have been removed)
@@ -555,7 +556,7 @@ set_infection_prev$species_char <- as.character(set_infection_prev$species)
 which(taxa$species==set_infection_prev$species_char[1])
 data_fam <- data.frame(family = taxa$fam[986])
 nrow(set_infection_prev)
-for(i in 2:2281) {
+for(i in 2:2140) {
   new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev$species_char[i])])
   data_fam <- rbind(data_fam, new_row)
 }
@@ -565,7 +566,7 @@ set_infection_prev_alphaonly$species_char <- as.character(set_infection_prev_alp
 which(taxa$species==set_infection_prev_alphaonly$species_char[1])
 data_fam <- data.frame(family = taxa$fam[986])
 nrow(set_infection_prev_alphaonly)
-for(i in 2:439) {
+for(i in 2:433) {
   new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev_alphaonly$species_char[i])])
   data_fam <- rbind(data_fam, new_row)
 }
@@ -575,7 +576,7 @@ set_infection_prev_betaonly$species_char <- as.character(set_infection_prev_beta
 which(taxa$species==set_infection_prev_betaonly$species_char[1])
 data_fam <- data.frame(family = taxa$fam[986])
 nrow(set_infection_prev_betaonly)
-for(i in 2:361) {
+for(i in 2:257) {
   new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev_betaonly$species_char[i])])
   data_fam <- rbind(data_fam, new_row)
 }
