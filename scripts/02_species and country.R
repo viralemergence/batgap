@@ -157,6 +157,29 @@ cdata$data$tip=cdata$data$species
 ## taxonomy
 cdata$data$taxonomy=with(cdata$data,paste(fam,gen,species,sep='; '))
 
+## just sampled bats
+sdata=cdata[cdata$data$binstudy==1,]
+
+## D statistic on sampled/not sampled
+set.seed(1)
+dstat=phylo.d(data=cdata,binvar=binstudy,permut=1000)
+
+## number of studies and number of bats
+hist(log10(sdata$data$studies))
+hist(log10(sdata$data$tested))
+
+## transform
+sdata$data$lstudies=log10(sdata$data$studies)
+sdata$data$ltested=log10(sdata$data$tested)
+
+## pagel's lambda
+pmod1=pgls(lstudies~1,data=sdata,lambda="ML")
+pmod2=pgls(ltested~1,data=sdata,lambda="ML")
+
+## summarize
+summary(pmod1)
+summary(pmod2)
+
 ## Holm rejection procedure
 HolmProcedure <- function(pf,FWER=0.05){
   
@@ -280,15 +303,12 @@ study_pf=gpf(Data=cdata$data,tree=cdata$phy,
 HolmProcedure(study_pf)
 study_res=pfsum(study_pf)$results
 
-## just sampled bats
-sdata=cdata[cdata$data$binstudy==1,]
-
 ## number of studies
 set.seed(1)
 nstudies_pf=gpf(Data=sdata$data,tree=sdata$phy,
               frmla.phylo=studies~phylo,
               family=poisson,
-              algorithm='phylo',nfactors=10,
+              algorithm='phylo',nfactors=5,
               min.group.size = 10)
 
 ## summarize
@@ -300,7 +320,7 @@ set.seed(1)
 nsamples_pf=gpf(Data=sdata$data,tree=sdata$phy,
                 frmla.phylo=sample~phylo,
                 family=poisson,
-                algorithm='phylo',nfactors=30,
+                algorithm='phylo',nfactors=25,
                 min.group.size = 10)
 
 ## summarize
@@ -359,11 +379,11 @@ cadd=function(gg,pf,pmax){
 }
 
 ## state pmax
-pmax=10
+pmax=30
 
 ## make base
 library(ggtree)
-base=ggtree(dtree,size=0.1,branch.length='none',layout="circular")
+base=ggtree(dtree,size=0.1)
 base2=ggtree(stree,size=0.1,branch.length='none',layout="circular")
 
 ## binary tree
@@ -388,7 +408,17 @@ samp=data.frame(x=tdata$x,
 
 ## fix gg
 plot1=gg+
-  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.75,alpha=0.5)
+  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.25,alpha=0.5)
+
+## fix plot1
+plot1=gg+
+  geom_tippoint(data=dtree,aes(colour=factor(binstudy),
+                               alpha=factor(binstudy)),
+                shape=15,size=0.75)+
+  guides(colour=F,alpha=F)+
+  scale_alpha_manual(values=c(0,1))+
+  scale_colour_manual(values=c("white","black"))
+plot1=plot1+ggtitle("(a) binary studied")
 
 ## number of studies
 gg=cadd(base2,nstudies_pf,pmax)
@@ -412,7 +442,8 @@ samp=data.frame(x=tdata$x,
 
 ## fix gg
 plot2=gg+
-  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.75,alpha=0.5)
+  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.25,alpha=0.5)
+plot2=plot2+ggtitle(expression(paste("(b) ",log[10]("studies"))))
 
 ## number of samples
 gg=cadd(base2,nsamples_pf,pmax)
@@ -431,13 +462,20 @@ library(scales)
 samp=data.frame(x=tdata$x,
                 y=tdata$y,
                 yend=tdata$y,
-                xend=rescale(tdata$tested,c(max(tdata$x),xmax)),
+                xend=rescale(log10(tdata$tested),c(max(tdata$x),xmax)),
                 species=tdata$species)
 
 ## fix gg
 plot3=gg+
-  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.75,alpha=0.5)
+  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.25,alpha=0.5)
+plot3=plot3+ggtitle(expression(paste("(c) ",log[10]("samples"))))
 
+## patchwork
+library(patchwork)
+plot1|(plot2/plot3)+plot_layout(widths=c(2,1))
+
+## temporary data file
+data=data_all
 
 ## clean countries to match world map
 data$country=revalue(data$country,
@@ -468,7 +506,6 @@ setdiff(set$country,wdata$country)
 
 ## aggregate number of studies and number of bats sampled per country
 library(tidyr)
-set$studies=set$Field.25
 sdata=set %>%
   #filter(!(studies == "highly diversified coronaviruses in neotropical bats")) %>%
   dplyr::select(studies, species, country, state, site, longitude, latitude, sample_year, start_year, sample) %>%
@@ -493,19 +530,18 @@ p1=ggplot(cdata,aes(long,lat))+
   scale_fill_viridis_c(na.value="grey70",option="cividis")+
   coord_map("gilbert",xlim=c(-180,180))+
   theme(legend.position="bottom")+
-  guides(fill=guide_colorbar(title="number of studies",
+  guides(fill=guide_colorbar(title="(a) studies",
                              barwidth = 15))
 
 ## visualize bats
 p2=ggplot(cdata,aes(long,lat))+
-  geom_polygon(aes(group=group,fill=log10(tested)),size=0.1,colour='white')+
+  geom_polygon(aes(group=group,fill=log1p(tested)),size=0.1,colour='white')+
   theme_void()+
   scale_fill_viridis_c(na.value="grey70",option="cividis")+
   coord_map("gilbert",xlim=c(-180,180))+
   theme(legend.position="bottom")+
-  guides(fill=guide_colorbar(title="log10 number of bats",
+  guides(fill=guide_colorbar(title=expression(paste("(b) ",log("samples + 1"))),
                              barwidth = 15))
 
 ## combine
-library(patchwork)
 p1+p2
