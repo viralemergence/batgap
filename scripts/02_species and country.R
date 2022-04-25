@@ -63,7 +63,7 @@ sdata=data.frame(studies=sdata,
                  species=unique(data_all$species))
 
 ## save
-s_all=sdata
+s_all=sdata ## 363 species
 
 ## repeat for alpha
 sdata=sapply(unique(data_alpha$species),function(x){
@@ -116,9 +116,9 @@ names(samples_alpha)=c("species","sample_alpha")
 names(samples_beta)=c("species","sample_beta")
 
 ## merge
-sdata=merge(sdata,samples_all,by="species")
-sdata=merge(sdata,samples_alpha,by="species")
-sdata=merge(sdata,samples_beta,by="species")
+sdata=merge(sdata,samples_all,by="species",all=T)
+sdata=merge(sdata,samples_alpha,by="species",all=T)
+sdata=merge(sdata,samples_beta,by="species",all=T)
 rm(samples_all,samples_alpha,samples_beta)
 
 ## all species
@@ -267,45 +267,13 @@ pfsum=function(pf){
   return(list(set=dat,results=results))
 }
 
-## negbin model fcn
-model.fcn2 <- function(formula,data,...){
-  fit <- tryCatch(MASS::glm.nb(formula,data,...),
-                  error=function(e) NA)
-  #fit <- do.call
-  return(fit)
-}
-
-## negbin objective function
-obj.fcn2 <- function(fit,grp,tree,PartitioningVariables,model.fcn,phyloData,...){
-  #if (!'negbin' %in% class(fit) & !'glm' %in% class(fit) & !'lm' %in% class(fit))
-  if (!'negbin' %in% class(fit))
-  {
-    return(0)
-  }
-  else 
-  {
-    #fit2 <- MASS::glm.nb(Z.poisson~1,data = fit$model)
-    fit$null.deviance-fit$deviance %>% return()
-    #fit$twologlik %>% return()
-  }
-}
-
-## studies: poisson or nb
-mean(cdata$data$studies)
-var(cdata$data$studies)
-
-## tested: poisson or nb
-mean(cdata$data$tested)
-var(cdata$data$tested)
-
 ## GPF for study binary
 library(phylofactor)
-library(MASS)
 set.seed(1)
 study_pf=gpf(Data=cdata$data,tree=cdata$phy,
              frmla.phylo=binstudy~phylo,
              family=binomial,
-             algorithm='phylo',nfactors=5,
+             algorithm='phylo',nfactors=10,
              min.group.size = 10)
 
 ## summarize
@@ -315,35 +283,34 @@ study_res=pfsum(study_pf)$results
 ## just sampled bats
 sdata=cdata[cdata$data$binstudy==1,]
 
-## repeat on number of studies
+## number of studies
 set.seed(1)
-nstudies_pf=gpf(Data=cdata$data,tree=cdata$phy,
+nstudies_pf=gpf(Data=sdata$data,tree=sdata$phy,
               frmla.phylo=studies~phylo,
-              #model.fcn = model.fcn2,objective.fcn = obj.fcn2,
-              #cluster.depends='library(MASS)',
               family=poisson,
-              algorithm='phylo',nfactors=10)
+              algorithm='phylo',nfactors=10,
+              min.group.size = 10)
 
 ## summarize
 HolmProcedure(nstudies_pf)
 nstudies_res=pfsum(nstudies_pf)$results
 
-## repeat on number of samples
+## number of samples
 set.seed(1)
-nsamples_pf=gpf(Data=cdata$data,tree=cdata$phy,
+nsamples_pf=gpf(Data=sdata$data,tree=sdata$phy,
                 frmla.phylo=sample~phylo,
-                #model.fcn = model.fcn2,objective.fcn = obj.fcn2,
-                #cluster.depends='library(MASS)',
                 family=poisson,
-                algorithm='phylo',nfactors=10)
+                algorithm='phylo',nfactors=30,
+                min.group.size = 10)
 
 ## summarize
 HolmProcedure(nsamples_pf)
 nsamples_res=pfsum(nsamples_pf)$results
 
-## save tree
+## save trees
 library(treeio)
-dtree=treeio::full_join(as.treedata(sdata$phy),sdata$data,by="label")
+dtree=treeio::full_join(as.treedata(cdata$phy),cdata$data,by="label")
+stree=treeio::full_join(as.treedata(sdata$phy),sdata$data,by="label")
 
 ## set x max
 plus=1
@@ -361,7 +328,7 @@ afun=function(x){
 pcols=afun(2)
 
 ## function to loop and add clades
-cadd=function(gg,pf){
+cadd=function(gg,pf,pmax){
   
   ## ifelse
   if(HolmProcedure(pf)==0){
@@ -370,6 +337,13 @@ cadd=function(gg,pf){
     
     ## make result
     result=pfsum(pf)$results
+    
+    ## ifelse 
+    if(nrow(result)>pmax){
+      result=result[1:pmax,]
+      }else{
+        result=result
+      }
     
     ## set tree
     for(i in 1:nrow(result)){
@@ -384,13 +358,16 @@ cadd=function(gg,pf){
   return(gg)
 }
 
+## state pmax
+pmax=10
+
 ## make base
 library(ggtree)
 base=ggtree(dtree,size=0.1,branch.length='none',layout="circular")
-base
+base2=ggtree(stree,size=0.1,branch.length='none',layout="circular")
 
-## nsamples tree
-gg=cadd(base,nsamples_pf)
+## binary tree
+gg=cadd(base,study_pf,pmax)
 
 ## get tree data
 tdata=base$data
@@ -406,34 +383,61 @@ library(scales)
 samp=data.frame(x=tdata$x,
                 y=tdata$y,
                 yend=tdata$y,
-                xend=rescale(log10(tdata$sample),c(max(tdata$x),xmax)),
+                xend=rescale(tdata$binstudy,c(max(tdata$x),xmax)),
                 species=tdata$species)
 
 ## fix gg
-gg+
+plot1=gg+
   geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.75,alpha=0.5)
 
-## get undersampled species
-usamp1=cladeget(study_pf,1)
-usamp2=cladeget(study_pf,2)
-usamps=c(usamp1,usamp2)
+## number of studies
+gg=cadd(base2,nstudies_pf,pmax)
 
-## genera
-usamp1=unique(sapply(strsplit(usamp1," "),function(x) x[1]))
-usamp2=unique(sapply(strsplit(usamp2," "),function(x) x[1]))
+## get tree data
+tdata=base2$data
 
-## load in betacov predictions
-setwd("~/Desktop/Fresnel_Jun")
-new=read.csv("BinaryPredictions.csv")
+## tips only
+tdata=tdata[which(tdata$isTip==T),]
 
-## ensemble T and betacov 0
-new$suspect=ifelse(new$Ensemble==TRUE & new$Betacov==0,1,0)
+## set x max
+xmax=max(tdata$x)+10
 
-## just suspect
-new=new[new$suspect==1,]
+## make data frame
+library(scales)
+samp=data.frame(x=tdata$x,
+                y=tdata$y,
+                yend=tdata$y,
+                xend=rescale(tdata$studies,c(max(tdata$x),xmax)),
+                species=tdata$species)
 
-## which are in poorly studies clades
-usamps[usamps%in%new$Sp]
+## fix gg
+plot2=gg+
+  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.75,alpha=0.5)
+
+## number of samples
+gg=cadd(base2,nsamples_pf,pmax)
+
+## get tree data
+tdata=base2$data
+
+## tips only
+tdata=tdata[which(tdata$isTip==T),]
+
+## set x max
+xmax=max(tdata$x)+10
+
+## make data frame
+library(scales)
+samp=data.frame(x=tdata$x,
+                y=tdata$y,
+                yend=tdata$y,
+                xend=rescale(tdata$tested,c(max(tdata$x),xmax)),
+                species=tdata$species)
+
+## fix gg
+plot3=gg+
+  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.75,alpha=0.5)
+
 
 ## clean countries to match world map
 data$country=revalue(data$country,
