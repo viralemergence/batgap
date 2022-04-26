@@ -1,7 +1,7 @@
 ## bat coronavirus gap analysis
 ## 02_species and country
 ## danbeck@ou.edu
-## last updated 42122
+## last updated 42522
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -547,6 +547,7 @@ gdata=gdata[!gdata$region=="",]
 
 ## GLM for binary sampling
 mod1=glm(binstudy~region,data=gdata,family=binomial)
+mod1=glm(binstudy~sub.region,data=gdata,family=binomial)
 
 ## within sampled GLMs
 gdata2=gdata[gdata$binstudy==1,]
