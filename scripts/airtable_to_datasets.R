@@ -16,7 +16,7 @@ library(cowplot)
 ##set working directory 
 setwd("~/Documents/GitHub/batgap/data")
 
-##Airtable as of April 13, 2022
+##Airtable as of April 26, 2022
 data <- read.csv("airtable.csv")
 
 #add column with simplified tissues
@@ -37,7 +37,7 @@ data$tissue_simplified<-revalue(data$tissue_simplified,
                                   "faecal swab"="faecal, rectal, or anal",
                                   "respiratory swab"="lung or respiratory",
                                   "faecal swab/faeces"="faecal, rectal, or anal",
-                                  "alimentary specimen"="intestine",
+                                  "alimentary specimen"="faecal, rectal, or anal",
                                   "respiratory specimen"="lung or respiratory",
                                   "faeces or urine swab"="pooled swabs/samples",
                                   "urine swab"="urinary",
@@ -82,7 +82,6 @@ data$tissue_simplified<-revalue(data$tissue_simplified,
                                   "oral swab,fecal swab"="pooled swabs/samples"))
 unique(data$tissue_simplified)
 unique(data$country)
-data$country <- revalue(data$country, c("?"="NA"))
 
 #add seasons
 data$summer <- data$sample_season_simplified
@@ -126,7 +125,7 @@ unique(data$latitude)
 data$latidudedecimal<-as.character(data$latitude)
 data$latidudedecimal <- revalue(data$latidudedecimal, c("51º77'27\"N"=angle2dec("51º 77' 27'' N"),"51º39’96\"N"=angle2dec("51º 39’ 96'' N"),"47º 00'39” N"=angle2dec("47º 00' 39'' N"),"47º 04'59” N"=angle2dec("47º 04' 59'' N"),"46º 56'23” N"=angle2dec("46º 56' 23'' N"),"47º 02'39” N"=angle2dec("47º 02' 39'' N"),"47º 04'24” N"=angle2dec("47º 04' 24'' N"),"46º 51'27” N"=angle2dec("46º 51' 27'' N"),"46º 49'28” N"=angle2dec("46º 49' 28'' N"),
                                         "50°25′46.91′′N"=angle2dec("50° 25' 46.91'' N"),"24°25'35″N"=angle2dec("24° 25' 35'' N"),"24°25'35″N (Miaoli), 23°19'04″N (Dongshan)"="NA","24°25'35″N (Miaoli), 23°19'04″N (Dongshan), 23°48'24″N (Dili)"="NA","24°25'35″N (Miaoli), 23°19'04″N (Dongshan), 23°48'24″N (Dili), 25°11'24″N (Guihui)"="NA","24°31' 55″N (Dong'ao), 24°31'9″N (Nan'ao), 24°25'35″N (Miaoli)"="NA","24°31'55″N (Dong'ao), 24°31'9″N (Nan'ao), 24°25'35″N (Miaoli)"="NA","24°31'9″N (Nan'ao), 24°25'35″N (Miaoli)"="NA","24°51'50″N (Wulai), 23°19'04″N (Dongshan)"="NA","24°31' 55″N"=angle2dec("24º 31' 55'' N"),"23°50'51″N (Jhutang), 23°34'05″N (Beigang)"="NA",
-                                        "23°37'14″N"=angle2dec("23° 37' 14'' N"),"6°42'2.0\"N"=angle2dec("6° 42' 2.0'' N"),"6°41'6.4\"N"=angle2dec("6° 41' 6.4'' N"),"6°32'22.3\"N"=angle2dec("6° 32' 22.3'' N"),"6°58\"N"=angle2dec("6° 0' 58'' N"),"7°43'24.9\"N"=angle2dec("7° 43' 24.9'' N"),"7°43'25.7\"N"=angle2dec("7° 43' 25.7'' N"),"13830018.9\"N"="13.830018","46°47′S"=angle2dec("46° 47′ 0'' S"),
+                                        "23°37'14″N"=angle2dec("23° 37' 14'' N"),"6°42'2.0\"N"=angle2dec("6° 42' 2.0'' N"),"6°41'6.4\"N"=angle2dec("6° 41' 6.4'' N"),"6°32'22.3\"N"=angle2dec("6° 32' 22.3'' N"),"6°58\'N"=angle2dec("6° 58' 0'' N"),"7°43'24.9\"N"=angle2dec("7° 43' 24.9'' N"),"7°43'25.7\"N"=angle2dec("7° 43' 25.7'' N"),"13830018.9\"N"="13.830018","46°47′S"=angle2dec("46° 47′ 0'' S"),
                                         "54°06'04\"N"=angle2dec("54° 06' 04'' N"),"54°16'44\"N"=angle2dec("54° 16' 44'' N"),"53°56′09′′N"=angle2dec("53° 56' 09'' N"),"54°16'18\"N"=angle2dec("54° 16' 18'' N"),"1°07N"=angle2dec("1° 07' 0'' N"),"0°82N"=angle2dec("0° 82' 0'' N"),"1°36 S"=angle2dec("1° 36' 0'' S"),"0°98N"=angle2dec("0° 98' 0'' N"),"0°86 S"=angle2dec("0° 86' 0'' S"),"23º50'51\"N"=angle2dec("23º 50' 51'' N"),
                                         "23º34'05\"N"=angle2dec("23º 34' 05'' N"),"38.3861ºS"=angle2dec("38.3861° 0' 0'' S"),"37.6515 ºS"=angle2dec("37.6515° 0' 0'' S"),"2016"="NA","42°5'30.7\"N"=angle2dec("42° 5' 30.7'' N"),"42°4'N"=angle2dec("42° 4' 0'' N"),"42°0'21.0\"N"=angle2dec("42° 0' 21.0'' N"),"42°9'32.0\"N"=angle2dec("42° 9' 32.0'' N"),"42°9'7.0\"N"=angle2dec("42° 9' 7.0'' N"),"39.6019\"N (Ogayu), 39.6771\" N (Isari), "="NA","6°41′13.56′′ N"=angle2dec("6° 41' 13.56'' N"),"7°43′24.899′′ N"=angle2dec("7° 43' 24.899'' N"),"7°35′23.1′′ N"=angle2dec("7° 35' 23.1'' N"),
                                         "6°58′0.001′′ N"=angle2dec("6° 58' 0.001'' N"),"7°15′43.099′′ N"=angle2dec("7° 15' 43.099'' N"),"5°55′44.4′′ N"=angle2dec("5° 55' 44.4'' N"),"50°27′0.324′′ N"=angle2dec("50° 27' 0.324'' N"),"54°14′51.271′′ N"=angle2dec("54° 14' 51.271'' N"),"45°12′0.00′′ N"=angle2dec("45° 12' 0.00'' N"),"50°20′5.316′′ N"=angle2dec("50° 20' 5.316'' N"),"52°1′46.859′′ N"=angle2dec("52° 1' 46.859'' N"),"10º21'14.2\"N, 10º50'08.5\"N"="NA","10º21'14.2\"N"=angle2dec("10º 21' 14.2'' N"),
@@ -137,9 +136,9 @@ data$latidudedecimal <- as.numeric(data$latidudedecimal)
 
 unique(data$longitude)
 data$longitudedecimal <- data$longitude
-data$longitudedecimal <- revalue(data$longitudedecimal, c("1º33'41\"E"=angle2dec("1º 33' 41'' E"),"1º67'75\"E"=angle2dec("1º 67' 75'' E"),"02º 34'54'' E"=angle2dec("02º 34' 54'' E")," 02º 31'02” E"=angle2dec("02º 31' 02'' E"),"02º 32'19” E"=angle2dec("02º 32' 19'' E"),"02º 33'38” E"=angle2dec("02º 33' 38'' E"),"02º 31122” E"=angle2dec("02º 31' 22'' E"),"02º 18'59” E"=angle2dec("02º 18' 59” E"),"02º 23'21” E"=angle2dec("02º 23' 21'' E"),
+data$longitudedecimal <- revalue(data$longitudedecimal, c("-1º33'41\"E"=angle2dec("-1º 33' 41'' E"),"-1º67'75\"E"=angle2dec("-1º 67' 75'' E"),"02º 34'54'' E"=angle2dec("02º 34' 54'' E")," 02º 31'02” E"=angle2dec("02º 31' 02'' E"),"02º 32'19” E"=angle2dec("02º 32' 19'' E"),"02º 33'38” E"=angle2dec("02º 33' 38'' E"),"02º 31122” E"=angle2dec("02º 31' 22'' E"),"02º 18'59” E"=angle2dec("02º 18' 59” E"),"02º 23'21” E"=angle2dec("02º 23' 21'' E"),
                                           "6°55′52.17′′E"=angle2dec("6° 55' 52.17'' E"),"121°49'53″E"=angle2dec("121° 49' 53'' E"),"121°00'45″E"=angle2dec("121° 00' 45'' E"),"121°00'45″E (Miaoli), 120°25'27″E (Dongshan)"="NA","121°00'45″E (Miaoli), 120°250 27″E (Dongshan), 120°54'51″E (Dili)"="NA","121°00'45″E (Miaoli), 120°25'27″E (Dongshan), 120°54'51″E (Dili), 121°40'41″E (Guihui)"="NA","121°49'53″E (Dong'ao), 121°46'2″E (Nan'ao), 121°00'45″E (Miaoli)"="NA","121°46'2″E (Nan'ao), 121°00'45″E (Miaoli)"="NA","121°33'05″E (Wulai), 120°25'27″E (Dongshan)"="NA","120°23'12″E"=angle2dec("120° 23' 12'' E"),"120°23'12″E (Jhutang), 120°17'51″E (Beigang)"="NA",
-                                          "120°15'40″E"=angle2dec("120° 15' 40'' E"),"1°37\"29.9\"W"=angle2dec("1° 37' 29.9'' W"),"1°33'42.8\"W"=angle2dec("1° 33' 42.8'' W"),"1°24'41.5\"W"=angle2dec("1° 24' 41.5'' W"),"1°16\"W"=angle2dec("1° 0' 16'' W")," 1°59'16.5\"W"=angle2dec("1° 59' 16.5'' W"),"1°59'33.5\"W"=angle2dec("1° 59' 33.5'' W"),"101809054.9\"E"="101.8090549","167°38′E"=angle2dec("167° 38' 0'' E"),
+                                          "120°15'40″E"=angle2dec("120° 15' 40'' E"),"1°37\"29.9\"W"=angle2dec("1° 37' 29.9'' W"),"1°33'42.8\"W"=angle2dec("1° 33' 42.8'' W"),"1°24'41.5\"W"=angle2dec("1° 24' 41.5'' W"),"1°16\'W"=angle2dec("1° 16' 0'' W")," 1°59'16.5\"W"=angle2dec("1° 59' 16.5'' W"),"1°59'33.5\"W"=angle2dec("1° 59' 33.5'' W"),"101809054.9\"E"="101.8090549","167°38′E"=angle2dec("167° 38' 0'' E"),
                                           "10°14'14\"E"=angle2dec("10° 14' 14'' E"),"9°58'17\"E"=angle2dec("9° 58' 17'' E"),"10°18′57′′E"=angle2dec("10° 18' 57'' E"),"10°17'14\"E"=angle2dec("10° 17' 14'' E"),"13°20 E"=angle2dec("13° 20' 0'' E"),"13°45 E"=angle2dec("13° 45' 0'' E"),"13°46 E"=angle2dec("13° 46' 0'' E")," 13°19 E"=angle2dec("13° 19' 0'' E"),"12°77 E"=angle2dec("12° 77' 0'' E"),"120º23'12\"E"=angle2dec("120º 23' 12'' E"),
                                           "120º17'51\"E"=angle2dec("120º 17' 51'' E"),"142.5931ºE"=angle2dec("142.5931° 0' 0'' E"),"145.3173ºE"=angle2dec("145.3173° 0' 0'' E"),"27°12'31.3\"E\005"=angle2dec("27° 12' 31.3'' E"),"27°46'E"=angle2dec("27° 46' 0'' E")," 27°25'21.3\"E"=angle2dec("27° 25' 21.3'' E"),"27°30'45.0\"E"=angle2dec("27° 30' 45.0'' E"),"27°21'28.0\"E"=angle2dec("27° 21' 28.0'' E"),"141.2508\"E (Ogayu),  141.0881\"E (Isari)"='NA',"1°20′38.94′′ W"=angle2dec("1° 20' 38.94'' W"),"1°59′16.501′′ W"=angle2dec("1° 59' 16.501'' W"),"1°52′30.299′′ W"=angle2dec("1° 52' 30.299'' W"),"1°16′0.001\" W"=angle2dec("1° 16' 0.001'' W"),
                                           "0°29′29.501\" E"=angle2dec("0° 29' 29.501'' E"),"0°4′30′′ E"=angle2dec("0° 4' 30'' E"),"30°31′24.24\" E"=angle2dec("30° 31' 24.24'' E"),"10°4′3.347′′ E"=angle2dec("10° 4' 3.347'' E"),"29°0′0.00′′ E"=angle2dec("29° 0' 0.00'' E"),"7°14′30.912′′ E"=angle2dec("7° 14' 30.912'' E"),"6°13′4.908′′ E"=angle2dec("6° 13' 4.908'' E"),"85º19'45.7\"W, 85º37'27.2\" W"="NA","85º19'45.7\"W"=angle2dec("85º 19' 45.7'' W"),"85º19'45.7\"W, 85º15'55.2\"W"="NA",
@@ -147,6 +146,7 @@ data$longitudedecimal <- revalue(data$longitudedecimal, c("1º33'41\"E"=angle2de
                                           "84º08'01.6\"W"=angle2dec("84º 08' 01.6'' W"),"84º08'01.6\"W, 85º26'47.33\" W"="NA","84º50'16.7\"W"=angle2dec("84º 50' 16.7'' W")))
 unique(data$longitudedecimal)
 data$longitudedecimal <- as.numeric(data$longitudedecimal)
+
 
 #add euthanasia column
 data$title <- gsub('[\"]', '', data$title)
@@ -264,6 +264,10 @@ data$euthanasia<-revalue(data$euthanasia,
                                   "white-nose syndrome is associated with increased replication of a naturally persisting coronaviruses in bats"="N/A; experimental infection",
                                   "wide diversity of coronaviruses in frugivorous and insectivorous bat species: a pilot study in guinea, west africa"="No",
                                   "wild animal surveillance for coronavirus hku1 and potential variants of other coronaviruses"="No"))
+unique(data$euthanasia)
+data$euthanasia_simplified <- data$euthanasia
+data$euthanasia_simplified <- revalue(data$euthanasia_simplified, c("Yes, BUT for previous study or rabies surveillance"="Yes","Yes, for this study"="Yes","Yes, for this study; also rabies submissions + found carcasses were processed"="Yes","Yes, but only a subset for species ID, tissue tropism work"="Yes","Yes, but only a subset (no reason provided)"="Yes","No, but some bats were found dead and processed for study"="No","N/A; experimental infection"="No","No, but some bats died during trapping/processing and were necropsied and tissues processed"="No","N/A (samples from previous study used)"="Yes"))
+unique(data$euthanasia_simplified)
 
 #simplify study detection method (specific)
 unique(data$method_specific)
@@ -272,9 +276,14 @@ data$method_specific_simplified <- data$method_specific
 data$method_specific_simplified <- revalue(data$method_specific_simplified, c("Lateral flow immunoassay"="Lateral Flow Immunoassay","broadly reactive heminested RT-PCR"="PCR","hemi-nested RT-PCR"="PCR","RT-PCR"="PCR","RT-PCR,nested RT-PCR"="PCR","semi-nested RT-PCR"="PCR","nested RT-PCR"="PCR","nested PCR"="PCR","end point PCR"="PCR","RT-PCR,hemi-nested PCR"="PCR","consensus RT-PCR"="PCR","consensus nested-PCR"="PCR","\"SARS coronavirus crude antigen ELISA (Yu, 2008)\""="ELISA","double heminested RT-PCR"="PCR","rtRT-PCR"="PCR","RT-PCR,semi-nested RT-PCR,nested RT-PCR"="PCR","broadly reactive nested RT-PCR"="PCR","pancoronavirus Nested PCR"="PCR","pancoronavirus nested RT-PCR"="PCR","degenerate concensus PCR"="PCR","nested RT-PCR,semi-nested RT-PCR"="PCR","Enzyme immunoassay"="ELISA","RT-qPCR,semi-nested PCR"="PCR","pancoronavirus RT-PCR"="PCR"))
 unique(data$method_specific_simplified)
 
-#check virus genera data
+#check virus genera data + add simplified column
 unique(data$virus_genus)
 data$virus_genus[which(data$virus_genus=="betacoronavirus ")] <- "betacoronavirus"
+
+unique(data$virus_genus)
+data$virus_genus_simplified <- data$virus_genus
+data$virus_genus_simplified <- revalue(data$virus_genus_simplified, c("alphacoronavirus or betacoronavirus or gammacoronavirus"="genus not specified","alphacoronavirus or betacoronavirus"="genus not specified","alphacoronavirus or betacoronavirus or gammacoronavirus or deltacoronavirus"="genus not specified","alphacoronavirus and betacoronavirus"="genus not specified","alphacoronavirus/alphacoronavirus coinfection"="coinfection","alphacoronavirus/betacoronavirus coinfection"="coinfection","betacoronavirus/betacoronavirus coinfection"="coinfection"))
+unique(data$virus_genus_simplified)
 
 ##load in Upham phylogeny
 tree <- read.nexus("MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre")
@@ -438,10 +447,10 @@ data$species_for_reader=revalue(data$species_for_reader,
                        "Miniopterus sp."="Miniopterus",
                        "Scotoecus sp."="Miniopterus",
                        "Rhinolophus sinicus,Rhinolophus ferrumequinum"="Rhinolophus",
-                       "Myotis aurascens Kuzyakin,Myotis petax"="Myotis",
-                       "(multiple) species of horseshoe bat"="Rhinolophus"))
+                       "Myotis aurascens Kuzyakin,Myotis petax"="Myotis"))
 
 ## check
+setdiff(data$species_for_reader,tree$tip)
 unique(data$species_for_reader)
 data_for_reader <- data
 
@@ -450,26 +459,28 @@ setdiff(data$species_for_reader,tree$tip)
 set=data[data$species_for_reader%in%tree$tip.label,,]
 set$species=factor(set$species_for_reader)
 set$studies=factor(set$title)
+#check
+setdiff(set$species,tree$tip)
 
-###genus-level coronavirus datasets: 
-#1) infection prevalence analyses (antibody + IHC rows removed, flagged rows removed)
+###datasets: 
+#1) infection prevalence analyses (antibody + IHC rows removed, flagged rows removed, coinfection rows removed) - all cov genera
 set_infection_prev <- set[-which(set$detection_method== "IHC" | set$detection_method=="antibody"),,]
 set_infection_prev <- set_infection_prev[which(set_infection_prev$Flag=="only use these two rows for prevalence estimates" | set_infection_prev$Flag==""),,]
-unique(set_infection_prev$detection_method)
-#^dataset for prevalence estimates
+set_infection_prev <- set_infection_prev[-which(set_infection_prev$virus_genus_simplified== "coinfection"),,]
 
-#2) other analyses (two rows only for prevalence have been removed)
+#2) other analyses (five rows only for prevalence have been removed, coinfection rows removed) - all cov genera
 set_other <- set[which(set$Flag=="" | set$Flag=="include rows for taxonomic/geographic patterns in yes/no sampled and yes/no positive but NOT in prevalence analyses because denominators correspond to region and not species" | set$Flag=="airtable double counts by including study table 1 (ID 1120-1122)+ table 2 (ID 2945-2956): study included in binary analyses but not prevalence estimates"),,]
+set_other <- set_other[-which(set_other$virus_genus_simplified== "coinfection"),,]
 
 ###alpha-only and beta-only datasets:
 #1) infection prevalence analyses
-unique(set_infection_prev$virus_genus)
-set_infection_prev_alphaonly <- set_infection_prev[which(set_infection_prev$virus_genus=="alphacoronavirus" | set_infection_prev$virus_genus=="alphacoronavirus/alphacoronavirus coinfection"),,] 
-set_infection_prev_betaonly <- set_infection_prev[which(set_infection_prev$virus_genus=="betacoronavirus"),,]
+set_infection_prev_alphaonly <- set_infection_prev[c(which(set_infection_prev$virus_genus_simplified=="alphacoronavirus"),which(set_infection_prev$virus_genus_simplified=="genus not specified" & set_infection_prev$positives==0)),,] 
+set_infection_prev_betaonly <- set_infection_prev[c(which(set_infection_prev$virus_genus_simplified=="betacoronavirus"),which(set_infection_prev$virus_genus_simplified=="genus not specified" & set_infection_prev$positives==0)),,]
+
 
 #2) other analyses
-set_other_alphaonly <- set_other[which(set_other$virus_genus=="alphacoronavirus" | set_other$virus_genus=="alphacoronavirus/alphacoronavirus coinfection"),,] 
-set_other_betaonly <- set_other[which(set_other$virus_genus=="betacoronavirus"),,]
+set_other_alphaonly <- set_other[c(which(set_other$virus_genus_simplified=="alphacoronavirus"),which(set_other$virus_genus_simplified=="genus not specified" & set_other$positives==0)),,] 
+set_other_betaonly <- set_other[c(which(set_other$virus_genus_simplified=="betacoronavirus"),which(set_other$virus_genus_simplified=="genus not specified" & set_other$positives==0)),,]
 
 #infection prevalence analyses
 ## trim tree to species in set
@@ -556,7 +567,7 @@ set_infection_prev$species_char <- as.character(set_infection_prev$species)
 which(taxa$species==set_infection_prev$species_char[1])
 data_fam <- data.frame(family = taxa$fam[986])
 nrow(set_infection_prev)
-for(i in 2:2140) {
+for(i in 2:2076) {
   new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev$species_char[i])])
   data_fam <- rbind(data_fam, new_row)
 }
@@ -566,7 +577,7 @@ set_infection_prev_alphaonly$species_char <- as.character(set_infection_prev_alp
 which(taxa$species==set_infection_prev_alphaonly$species_char[1])
 data_fam <- data.frame(family = taxa$fam[986])
 nrow(set_infection_prev_alphaonly)
-for(i in 2:433) {
+for(i in 2:1770) {
   new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev_alphaonly$species_char[i])])
   data_fam <- rbind(data_fam, new_row)
 }
@@ -576,7 +587,7 @@ set_infection_prev_betaonly$species_char <- as.character(set_infection_prev_beta
 which(taxa$species==set_infection_prev_betaonly$species_char[1])
 data_fam <- data.frame(family = taxa$fam[986])
 nrow(set_infection_prev_betaonly)
-for(i in 2:257) {
+for(i in 2:1627) {
   new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev_betaonly$species_char[i])])
   data_fam <- rbind(data_fam, new_row)
 }
@@ -597,7 +608,6 @@ write.csv(set_other_betaonly,"~/Documents/GitHub/batgap/data/set_other_betaonly.
 
 
 #ready for models
-
 
 
 

@@ -13,9 +13,16 @@ library(stringr)
 library(reshape2)
 library(cowplot)
 library(ggrepel)
-
+unique(set_infection_prevalence$virus_genus)
 ##set working directory 
 setwd("~/Documents/GitHub/batgap/data")
+
+(length(which(set_infection_prevalence[which(set_infection_prevalence$virus_genus=="alphacoronavirus/betacoronavirus coinfection"),,]$positives==0))/length(which(set_infection_prevalence$virus_genus=="alphacoronavirus/betacoronavirus coinfection")))*100
+(length(which(set_infection_prevalence[which(set_infection_prevalence$virus_genus=="alphacoronavirus and betacoronavirus and independent bat coronavirus"),,]$positives==0))/length(which(set_infection_prevalence$virus_genus=="alphacoronavirus and betacoronavirus and independent bat coronavirus")))*100
+
+set_infection_prevalence[which(set_infection_prevalence$virus_genus=="alphacoronavirus/alphacoronavirus coinfection"),,]
+
+set_infection_prevalence[which(set_infection_prevalence$title=="ecoepidemiology and complete genome comparison of different strains of severe acute respiratory syndrome-related rhinolophus bat coronavirus in china reveal bats as a reservoir for acute, self-limiting infection that allows recombination events"),,]
 
 ##load binary datasets
 set_other <- read.csv("set_other.csv")
@@ -26,12 +33,6 @@ set_other_betaonly <- read.csv("set_other_betaonly.csv")
 set_infection_prevalence <- read.csv("set_infection_prevalence.csv")
 set_infection_prevalence_alphaonly <- read.csv("set_infection_prevalence_alphaonly.csv")
 set_infection_prevalence_betaonly <- read.csv("set_infection_prevalence_betaonly.csv")
-
-set_infection_prevalence <- set_infection_prevalence[-6,,]
-set_infection_prevalence <- set_infection_prevalence[-which(set_infection_prevalence$detection_method=="Antibody"),,]
-set_infection_prevalence_alphaonly <- set_infection_prevalence_alphaonly[-4,,]
-set_infection_prevalence_alphaonly <- set_infection_prevalence_alphaonly[-which(set_infection_prevalence_alphaonly$detection_method=="antibody"),,]
-set_infection_prevalence_betaonly <- set_infection_prevalence_betaonly[-which(set_infection_prevalence_betaonly$detection_method=="antibody"),,]
 
 ##count_all is going to be positives and negatives while only alpha and only beta are going to be mostly positive?
 count_all <- set_other[which(set_other$method_specific_simplified!="NA"),,] %>%
@@ -90,24 +91,54 @@ cmatrix_all=vcv.phylo(stree_all,cor=T)
 cmatrix_alpha=vcv.phylo(stree_alpha,cor=T)
 cmatrix_beta=vcv.phylo(stree_beta,cor=T)
 
-#models
-model_all=rma.mv(yi=yi,V=vi,
-                       random=list(~1|study/observation,~1|species,~1|phylo),
-                       R=list(phylo=cmatrix_all),
-                       method="REML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + detection_method, data=set_infection_prevalence,
-                       control=list(optimizer="optim", optmethod="BFGS"))
+set_infection_prevalence$euthanasia_simplified <- set_infection_prevalence$euthanasia
+set_infection_prevalence$euthanasia_simplified <- revalue(set_infection_prevalence$euthanasia_simplified, c("Yes, BUT for previous study or rabies surveillance"="Yes","Yes, for this study"="Yes","Yes, for this study; also rabies submissions + found carcasses were processed"="Yes","Yes, but only a subset for species ID, tissue tropism work"="Yes","Yes, but only a subset (no reason provided)"="Yes","No, but some bats were found dead and processed for study"="No","N/A; experimental infection"="No","N/A (samples from previous study used)"="Yes"))
+set_infection_prevalence_alphaonly$euthanasia_simplified <- set_infection_prevalence_alphaonly$euthanasia
+set_infection_prevalence_alphaonly$euthanasia_simplified <- revalue(set_infection_prevalence_alphaonly$euthanasia_simplified, c("Yes, BUT for previous study or rabies surveillance"="Yes","Yes, for this study"="Yes","Yes, for this study; also rabies submissions + found carcasses were processed"="Yes","N/A; experimental infection"="No"))
+set_infection_prevalence_betaonly$euthanasia_simplified <- set_infection_prevalence_betaonly$euthanasia
+set_infection_prevalence_betaonly$euthanasia_simplified <- revalue(set_infection_prevalence_betaonly$euthanasia_simplified, c("Yes, BUT for previous study or rabies surveillance"="Yes","Yes, for this study"="Yes","Yes, but only a subset for species ID, tissue tropism work"="Yes","Yes, but only a subset (no reason provided)"="Yes","N/A (samples from previous study used)"="Yes"))
 
-model_alpha=rma.mv(yi=yi,V=vi,
+nrow(set_infection_prevalence)
+#complete dataset: seasons have 191 NAs (8.9%)
+##66.9% = zero prevalence 
+
+#alphacovs only: seasons have 20 NAs (4.6%)
+#model can't run because method_specific_simplified only has one value (PCR)
+##only 4.6% = zero prevalence 
+
+#betacovs only: seasons have 6 NAs (2.3%)
+##only 10.1% = zero prevalence 
+
+unique(set_infection_prevalence$method_specific_simplified)
+
+#models all covariates
+model_allcovar=rma.mv(yi=yi,V=vi,
                  random=list(~1|study/observation,~1|species,~1|phylo),
-                 R=list(phylo=cmatrix_alpha),
-                 method="REML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + detection_method, data=set_infection_prevalence_alphaonly,
+                 R=list(phylo=cmatrix_all),
+                 method="REML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + detection_method + euthanasia_simplified + family + summer + winter + fall + spring, data=set_infection_prevalence,
                  control=list(optimizer="optim", optmethod="BFGS"))
 
-model_beta=rma.mv(yi=yi,V=vi,
-                 random=list(~1|study/observation,~1|species,~1|phylo),
-                 R=list(phylo=cmatrix_beta),
-                 method="REML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + detection_method, data=set_infection_prevalence_betaonly,
-                 control=list(optimizer="optim", optmethod="BFGS"))
+model_alphaallcovar=rma.mv(yi=yi,V=vi,
+                   random=list(~1|study/observation,~1|species,~1|phylo),
+                   R=list(phylo=cmatrix_alpha),
+                   method="REML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + detection_method + euthanasia_simplified + family + summer + winter + fall + spring, data=set_infection_prevalence_alphaonly,
+                   control=list(optimizer="optim", optmethod="BFGS"))
+
+model_betaallcovar=rma.mv(yi=yi,V=vi,
+                  random=list(~1|study/observation,~1|species,~1|phylo),
+                  R=list(phylo=cmatrix_beta),
+                  method="REML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + detection_method + euthanasia_simplified + family + summer + winter + fall + spring, data=set_infection_prevalence_betaonly,
+                  control=list(optimizer="optim", optmethod="BFGS"))
+
+model_all_lm <- lm(yi ~ study_type + single.multiple.PCR.method + tissue_simplified + detection_method + euthanasia_simplified + family + summer + winter + fall + spring, data=set_infection_prevalence)
+model_alpha_lm <- lm(yi ~ study_type + single.multiple.PCR.method + tissue_simplified + detection_method + euthanasia_simplified + family + summer + winter + fall + spring, data=set_infection_prevalence_alphaonly)
+model_beta_lm <- lm(yi ~ study_type + single.multiple.PCR.method + tissue_simplified + detection_method + euthanasia_simplified + family + summer + winter + fall + spring, data=set_infection_prevalence_betaonly)
+
+car::vif(model_all_lm)
+
+library(car)
+regclass::VIF(model_allcovar)
+vif(model_betaallcovar)
 
 ##model with no covariates
 model_nomods=rma.mv(yi=yi,V=vi,
@@ -128,7 +159,7 @@ model_beta_nomods=rma.mv(yi=yi,V=vi,
              method="REML",mods=~1,data=set_infection_prevalence_betaonly,
              control=list(optimizer="optim", optmethod="BFGS"))
 
-unique(set_infection_prevalence$species)
+
 ##model with study type as mod
 model_with_studytype=rma.mv(yi=yi,V=vi,
                                 random=list(~1|study/observation,~1|species,~1|phylo),
@@ -199,6 +230,7 @@ model_fam_season_beta=rma.mv(yi=yi,V=vi,
                         method="REML",mods=~family + summer + winter + fall + spring, data=set_infection_prevalence_betaonly,
                         control=list(optimizer="optim", optmethod="BFGS"))
 #Redundant predictors dropped from the beta model, NA rows removed from all three 
+length(which(is.na(set_infection_prevalence$latitude) | is.na(set_infection_prevalence$longitude)))/nrow(set_infection_prevalence)
 
 ##model with bat family + sampling season + lat/longs as mods 
 model_fam_season_latlong=rma.mv(yi=yi,V=vi,
