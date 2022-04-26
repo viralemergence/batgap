@@ -507,7 +507,6 @@ setdiff(set$country,wdata$country)
 ## aggregate number of studies and number of bats sampled per country
 library(tidyr)
 sdata=set %>%
-  #filter(!(studies == "highly diversified coronaviruses in neotropical bats")) %>%
   dplyr::select(studies, species, country, state, site, longitude, latitude, sample_year, start_year, sample) %>%
   dplyr::distinct() %>% 
   dplyr::group_by(country) %>%
@@ -515,6 +514,62 @@ sdata=set %>%
                    studies = dplyr::n_distinct(studies)) 
 adata=data.frame(sdata)
 rm(sdata)
+
+## load georegion
+setwd("~/Desktop/batgap/data")
+geo=read.csv("georegion.csv")
+
+## standardize
+geo$country=geo$name
+geo=geo[c("country","region","sub.region")]
+
+## fix country
+setdiff(adata$country,geo$country)
+geo$country=revalue(geo$country,
+                    c("United States of America"="USA",
+                      "United Kingdom of Great Britain and Northern Ireland"="UK",
+                      "Korea (Democratic People's Republic of)"="Korea",
+                      "Korea, Republic of"="Korea",
+                      "Congo, Democratic Republic of the"="Democratic Republic of the Congo",
+                      "Taiwan, Province of China"="Taiwan",
+                      "Trinidad and Tobago"="Trinidad",
+                      "Viet Nam"="Vietnam"))
+setdiff(adata$country,geo$country)
+
+## merge
+gdata=merge(geo,adata,by="country",all.x=T)
+
+## binary sampling
+gdata$binstudy=ifelse(is.na(gdata$studies),0,1)
+
+## clean
+gdata=gdata[!gdata$region=="",]
+
+## GLM for binary sampling
+mod1=glm(binstudy~region,data=gdata,family=binomial)
+
+## within sampled GLMs
+gdata2=gdata[gdata$binstudy==1,]
+mod2=glm(studies~region,data=gdata,family=poisson)
+mod3=glm(tested~region,data=gdata,family=poisson)
+
+## R2
+library(performance)
+r2_mcfadden(mod1)
+r2_mcfadden(mod2)
+r2_mcfadden(mod3)
+
+## visreg
+library(visreg)
+visreg(mod1,"region",scale="response")
+visreg(mod2,"region",scale="response")
+visreg(mod3,"region",scale="response")
+
+## posthoc
+library(emmeans)
+s1=emmeans(mod1,list(pairwise~region),level=0.95,adjust="fdr",type="response")
+s2=emmeans(mod2,list(pairwise~region),level=0.95,adjust="fdr",type="response")
+s3=emmeans(mod3,list(pairwise~region),level=0.95,adjust="fdr",type="response")
 
 ## merge with wdata
 cdata=dplyr::left_join(wdata,adata,by="country",copy=T)
