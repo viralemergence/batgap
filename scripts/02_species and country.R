@@ -1,6 +1,7 @@
 ## bat coronavirus gap analysis
 ## 02_species and country
 ## danbeck@ou.edu
+## last updated 42522
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -16,14 +17,13 @@ library(viridis)
 library(stringr)
 library(reshape2)
 
-## load data manual
+## load datasets for geographic and taxonomic analyses
 setwd("~/Desktop/batgap/data")
-data=read.csv("batdata.csv")
+data_all=read.csv("set_other.csv")
+data_alpha=read.csv("set_other_alphaonly.csv")
+data_beta=read.csv("set_other_betaonly.csv")
 
-## exclude row 98 (incorrect data)
-data=data[-98,]
-
-## ## load in Upham phylogeny
+## load in Upham phylogeny
 setwd("~/Desktop/batgap/phylos")
 tree=read.nexus('MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre')
 
@@ -40,226 +40,18 @@ tree$tip.label=sapply(strsplit(tree$tip.label,'_'),function(x) paste(x[1],x[2],s
 taxa$species=sapply(strsplit(taxa$tip,'_'),function(x) paste(x[1],x[2],sep=' '))
 
 ## are all bats in tree
-setdiff(data$bat_species,tree$tip)
-
-## multiple species?
-data$spec=sapply(strsplit(data$bat_species,","),function(x) length(x))
-
-## fix others
-data$species=data$bat_species
-data$species=revalue(data$species,
-                      c("Pipistrellus javanicas"="Pipistrellus javanicus",
-                        "Scotphilus kuhlii"="Scotophilus kuhlii",
-                        "Rousettus leschenaulti"="Rousettus leschenaultii",
-                        "Myotis ricketti"="Myotis pilosus",
-                        "Miniopterus schreibersi"="Miniopterus schreibersii",
-                        "Rhinolophus pearsoni"="Rhinolophus pearsonii",
-                        "Neoromicia cf. zuluensis"="Neoromicia zuluensis",
-                        "Pteropus medius"="Pteropus giganteus",
-                        "Rousettous aegyptiacus"="Rousettus aegyptiacus",
-                        "Taphozous perforates"="Taphozous perforatus",
-                        "Hipposideros caffer ruber"="Hipposideros ruber",
-                        "Macronycteris commersoni"="Hipposideros commersoni",
-                        "Momopterus acetabulosus"="Mormopterus acetabulosus",
-                        "Pteropus seychellensis seychellensis"="Pteropus seychellensis",
-                        "myotis bechsteinii"="Myotis bechsteinii",
-                        "Pipistrellus nanus"="Neoromicia nana",
-                        "Miniopterus africanus"="Miniopterus inflatus",
-                        "Mesophylla macconnellii"="Mesophylla macconnelli",
-                        "Myotis formosus chofukusei"="Myotis formosus",
-                        "Pipistrelus abramus"="Pipistrellus abramus",
-                        "Myotis capaccini"="Myotis capaccinii",
-                        "Myotis oxygnatus"="Myotis blythii",
-                        "Epomps buettikoferi"="Epomops buettikoferi",
-                        "Austronomus australis"="Tadarida australis",
-                        "Nyctophilus major"="Nyctophilus timoriensis",
-                        "Nyctiphilus geoffroyi"="Nyctophilus geoffroyi",
-                        "Miniopterus orianae oceanensis"="Miniopterus orianae",
-                        "Miniopterus orianae bassanii"="Miniopterus orianae",
-                        "Haplonicteris fischeri"="Haplonycteris fischeri",
-                        "Dobsonia mollucensis"="Dobsonia moluccensis",
-                        "Molossus major"="Molossus molossus",
-                        "Rhinolophus affinus"="Rhinolophus affinis",
-                        "Megaerops kusnotei"="Megaerops kusnotoi",
-                        "Lissonycteris angolensis"="Myonycteris angolensis",
-                        "Nycteris cf. gambiensis"="Nycteris gambiensis",
-                        "Hipposideros cf. ruber"="Hipposideros ruber",
-                        "Hipposideros cf. gigas"="Hipposideros gigas",
-                        "Pipistrellus minus"="Pipistrellus tenuis",
-                        "Rhinolophus borneenis"="Rhinolophus borneensis",
-                        "Miniopterus meghrebensis"="Miniopterus maghrebensis",
-                        "Rhinoloplus malayanus"="Rhinolophus malayanus",
-                        "Craseonycteris thonlongyal"="Craseonycteris thonglongyai",
-                        "Coelops frithi"="Coelops frithii",
-                        "Rhinolophus malyanus"="Rhinolophus malayanus",
-                        "Peking Myotis,Myotis pequinius"="Myotis pequinius",
-                        "Miniopterus filiginosus"="Miniopterus fuliginosus",
-                        "Hypsugo pulveratus"="Pipistrellus pulveratus",
-                        "Tyloncyteris pachypus"="Tylonycteris pachypus",
-                        "Rousettus lechenaulti"="Rousettus leschenaultii",
-                        "Rhinolophus affiinus"="Rhinolophus affinis",
-                        "Vespertilio superans"="Vespertilio sinensis",
-                        "Rhinolophus rouxi"="Rhinolophus rouxii",
-                        "Myotis formosus flavus"="Myotis formosus",
-                        "Pipistrellus taiwanesis"="Pipistrellus taiwanensis",
-                        "Myotis fimbriatus taiwanensis"="Myotis fimbriatus",
-                        "Barbastella darjelingesis"="Barbastella beijingensis",
-                        "Hipposideros armiger terasensis"="Hipposideros armiger",
-                        "Coelops frithii formosanus"="Coelops frithii",
-                        "Rhinolophus darlingi damarensis"="Rhinolophus darlingi",
-                        "Nycticeinops schlieffenii"="Nycticeinops schlieffeni",
-                        "Neuromicia helios"="Neoromicia helios",
-                        "Neuromicia nana"="Neoromicia nana",
-                        "Scotorepens rueppellii"="Scoteanax rueppellii",
-                        "Hipposideros terasensis"="Hipposideros armiger",
-                        "Stenonycteris lanosus"="Rousettus lanosus",
-                        "Myonicteris angolensis"="Myonycteris angolensis",
-                        "Mormoops megalohyla"="Mormoops megalophylla",
-                        "Artibeus watsoni"="Dermanura watsoni",
-                        "Artibeus phaeotis"="Dermanura phaeotis",
-                        "Nycteris argae"="Nycteris arge",
-                        "Lyssonycteris angolensis"="Myonycteris angolensis",
-                        "Pipistrellus capensis"="Neoromicia capensis",
-                        "Myotis bocagei"="Myotis bocagii",
-                        "Chaerephon pumila"="Chaerephon pumilus",
-                        "Hypsugo savii"="Pipistrellus savii",
-                        "Myotis mistacinus"="Myotis mystacinus",
-                        "Myotis oxygnathus"="Myotis blythii",
-                        "Rhinolophus shamelli"="Rhinolophus shameli",
-                        "Rhinolophus blythi"="Rhinolophus lepidus",
-                        "Rhinolophus monoceros"="Rhinolophus pusillus",
-                        "Rhinolophus lobatus"="landeri",
-                        "Rhinolophus rhodesiae"="Rhinolophus simulator",
-                        "Pteropus seychellensis comorensis"="Pteropus seychellensis",
-                        "Chaerephon pusillus"="Chaerephon pumilus",
-                        "Taphosius mauritianus"="Taphozous mauritianus",
-                        "Chaerephon leucogaster"="Chaerephon pumilus",
-                        "Myotis cillolabrum"="Myotis ciliolabrum",
-                        "Vampyressa pussilla"="Vampyressa pusilla",
-                        "Artibeus literatus"="Artibeus lituratus",
-                        "Miniopterus orianae"="Miniopterus oceanensis",
-                        "Vampyriscus nymphaea"="Vampyressa nymphaea",
-                        "Glossophaga comissarisi"="Glossophaga commissarisi",
-                        "Eptesicus furnalis"="Eptesicus furinalis"))
-
-## check
-setdiff(data$species,tree$tip)
-length(setdiff(data$species,tree$tip))
-length(unique(data$species))
-## 4 missing from phylogeny
-## Myotis rufoniger, Pipistrellus montanus, Pipistrellus taiwanensis, Rhinolophus cornutus
-
-## trim dataset to only phylogeny
-set=data[data$species%in%tree$tip.label,]
-set$species=factor(set$species)
-set$studies=factor(set$Field.25)
+setdiff(data_all$species,tree$tip.label)
+setdiff(data_alpha$species,tree$tip.label)
+setdiff(data_beta$species,tree$tip.label)
 
 ## trim tree to species in set
-stree=keep.tip(tree,as.character(unique(set$species)))
+stree=keep.tip(tree,as.character(unique(data_all$species)))
 
-## convert tree to correlation matrix
-cmatrix=vcv.phylo(stree,cor=T)
-
-## make observation and study-level random effect
-set$observation=factor(1:nrow(set))
-set$study=factor(set$Field.25)
-
-## names of viral genera that aren't strictly alpha or beta
-vnames=c("alphacoronavirus or betacoronavirus or gammacoronavirus",
-         "alphacoronavirus or betacoronavirus",
-         "alphacoronavirus or betacoronavirus or gammacoronavirus or deltacoronavirus",
-         "?",
-         "alphacoronavirus/betacoronavirus coinfection",
-         "alphacoronavirus and betacoronavirus",
-         "alphacoronavirus and betacoronavirus and independent bat coronavirus",
-         "independent bat coronavirus")
-
-## flag as alphaCoV
-set$alpha=ifelse(set$virus_genus%in%c("alphacoronavirus",
-                                      "alphacoronavirus/alphacoronavirus coinfection"),1,0)
-
-## count any zeros using general detection as alpha-negative
-set$alpha=ifelse(set$positives==0 & set$virus_genus%in%vnames,1,set$alpha)
-
-## repeat with beta
-set$beta=ifelse(set$virus_genus%in%c("betacoronavirus","betacoronavirus "),1,0)
-set$beta=ifelse(set$positives==0 & set$virus_genus%in%vnames,1,set$beta)
-
-## check
-cset=set[c("virus_genus","positives","sample","alpha","beta")]
-
-## make positive columns for alpha and beta
-set$positives_alpha=ifelse(set$alpha==1,set$positives,NA)
-set$positives_beta=ifelse(set$beta==1,set$positives,NA)
-
-## make sample columns for alpha and beta
-set$sample_alpha=ifelse(set$alpha==1,set$sample,NA)
-set$sample_beta=ifelse(set$beta==1,set$sample,NA)
-
-## pft in escalc for yi and vi 
-set=data.frame(set,escalc(xi=set$positives,ni=set$sample,measure="PFT"))
-
-## back transform
-set$backtrans=transf.ipft(set$yi,set$sample)
-
-## check
-plot(set$prevalence,set$backtrans)
-abline(0,1)
-
-## make alpha and beta yi and vi
-alpha_es=escalc(xi=set$positives_alpha,ni=set$sample_alpha,measure="PFT")
-beta_es=escalc(xi=set$positives_beta,ni=set$sample_beta,measure="PFT")
-
-## append names
-names(alpha_es)=paste(names(alpha_es),"_alpha",sep="")
-names(beta_es)=paste(names(beta_es),"_beta",sep="")
-
-## cbind
-set=data.frame(set,alpha_es,beta_es)
-
-## species and phylo effect
-set$phylo=set$species
-set$species=set$phylo
-
-## function for I2 for rma.mv
-i2=function(model){
-  
-  ## metafor site code for I2
-  W=diag(1/model$vi)
-  X=model.matrix(model)
-  P=W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
-  I2=100 * sum(model$sigma2) / (sum(model$sigma2) + (model$k-model$p)/sum(diag(P)))
-  I2=round(I2,2)
-  
-  ## summarize by each variance component
-  allI2=100 * model$sigma2 / (sum(model$sigma2) + (model$k-model$p)/sum(diag(P)))
-  allI2=round(allI2,3)
-  return(list(I2=I2,allI2=allI2))
-}
-
-## model with no covariates
-model=rma.mv(yi=yi,V=vi,
-             random=list(~1|study/observation,~1|species,~1|phylo),
-             R=list(phylo=cmatrix),
-             method="REML",mods=~1,data=set,
-             control=list(optimizer="optim", optmethod="BFGS"))
-
-## aggregate to sampled bats
-library(tidyr)
-sdata=set %>%
-  #filter(!(studies == "highly diversified coronaviruses in neotropical bats")) %>%
-   dplyr::select(studies, species, country, state, site, longitude, latitude, sample_year, start_year, sample) %>%
-  dplyr::distinct() %>% 
-  dplyr::group_by(species) %>%
-   dplyr::summarize(tested = sum(sample),
-            nstudies = dplyr::n_distinct(studies)) 
-adata=data.frame(sdata)
-
-## number of studies
-sdata=sapply(unique(set$species),function(x){
+## number of studies per species: all data
+sdata=sapply(unique(data_all$species),function(x){
   
   ## tim
-  spec=set[set$species==x,]
+  spec=data_all[data_all$species==x,]
   
   ## unique studies
   l=length(unique(spec$studies))
@@ -268,73 +60,92 @@ sdata=sapply(unique(set$species),function(x){
 
 ## combine
 sdata=data.frame(studies=sdata,
-                 species=unique(set$species))
+                 species=unique(data_all$species))
 
-## test merge
-test=merge(adata,sdata,by="species")
-plot(test$studies,test$nstudies)
-cor(test$studies,test$nstudies)
-abline(0,1)
+## save
+s_all=sdata ## 363 species
+
+## repeat for alpha
+sdata=sapply(unique(data_alpha$species),function(x){
+  
+  ## tim
+  spec=data_alpha[data_alpha$species==x,]
+  
+  ## unique studies
+  l=length(unique(spec$studies))
+  return(l)
+})
+
+## combine
+sdata=data.frame(studies_alpha=sdata,
+                 species=unique(data_alpha$species))
+
+## save
+s_alpha=sdata
+
+## beta
+sdata=sapply(unique(data_beta$species),function(x){
+  
+  ## tim
+  spec=data_beta[data_beta$species==x,]
+  
+  ## unique studies
+  l=length(unique(spec$studies))
+  return(l)
+})
+
+## combine
+sdata=data.frame(studies_beta=sdata,
+                 species=unique(data_beta$species))
+
+## save
+s_beta=sdata
+
+## save as sdata
+sdata=merge(s_all,s_alpha,by="species",all=T)
+sdata=merge(sdata,s_beta,by="species",all=T)
+rm(s_all,s_alpha,s_beta)
+
+## number of samples per species
+samples_all=aggregate(sample~species,data=data_all,sum)
+samples_alpha=aggregate(sample~species,data=data_alpha,sum)
+samples_beta=aggregate(sample~species,data=data_beta,sum)
+
+## combine
+names(samples_alpha)=c("species","sample_alpha")
+names(samples_beta)=c("species","sample_beta")
+
+## merge
+sdata=merge(sdata,samples_all,by="species",all=T)
+sdata=merge(sdata,samples_alpha,by="species",all=T)
+sdata=merge(sdata,samples_beta,by="species",all=T)
+rm(samples_all,samples_alpha,samples_beta)
 
 ## all species
 adata=data.frame(species=tree$tip.label)
 
 ## merge
-sdata=merge(adata,test,by="species",all=T)
-rm(adata,test)
+sdata=merge(adata,sdata,by="species",all=T)
+rm(adata)
 
 ## no studies
 sdata$studies=ifelse(is.na(sdata$studies),0,sdata$studies)
+sdata$studies_alpha=ifelse(is.na(sdata$studies_alpha),0,sdata$studies_alpha)
+sdata$studies_beta=ifelse(is.na(sdata$studies_beta),0,sdata$studies_beta)
 
 ## no bats
-sdata$tested=ifelse(is.na(sdata$tested),0,sdata$tested)
+sdata$tested=ifelse(is.na(sdata$sample),0,sdata$sample)
+sdata$tested_alpha=ifelse(is.na(sdata$sample_alpha),0,sdata$sample_alpha)
+sdata$tested_beta=ifelse(is.na(sdata$sample_beta),0,sdata$sample_beta)
 
 ## binary
 sdata$binstudy=ifelse(sdata$studies==0,0,1)
+sdata$binstudy_alpha=ifelse(sdata$studies_alpha==0,0,1)
+sdata$binstudy_beta=ifelse(sdata$studies_beta==0,0,1)
 
 ## merge with taxa
 taxa=taxa[c("Species_Name","tiplabel","gen","fam","clade","tip","species")]
 sdata=merge(sdata,taxa,by="species")
-
-## which is weird
-sdata$odd=ifelse(tree$tip.label==sdata$species,1,0)
-
-## get betacov ensemble propranks from 2020
-setwd("~/Desktop/Fresnel_Jun/Cleaned Files_2020")
-batin=read.csv("BatModels_IS.csv")
-batout=read.csv("BatModels_OS.csv")
-
-## remove odd rows
-batout$fix=as.numeric(batout$Sp)
-batout=batout[is.na(batout$fix),]
-batout=batout[!is.na(batout$Sp),]
-
-## combine
-batold=rbind.data.frame(batin[intersect(names(batin),names(batout))],
-                        batout[intersect(names(batin),names(batout))])
-batold=batold[c("Sp","Betacov","PropRank","InSample")]
-
-## clean
-rm(batin,batout)
-
-## fix names
-batold$species=batold$Sp
-batold=batold[c("species","PropRank","Betacov")]
-
-## initial merge
-test=merge(sdata,batold,by="species",all=T)
-
-## plot proprank and studies
-ggplot(test,aes(PropRank,studies))+
-  geom_point(alpha=0.5,
-             aes(colour=factor(Betacov)))+
-  geom_smooth(method="glm",
-              method.args=list(family=poisson))+
-  theme_bw()+
-  guides(colour=F)+
-  scale_colour_manual(values=c("grey","red"))+
-  labs(x="proportional ranks for bat betacoronavirus hosts",
-       y="number of CoV studies per bat species")
 
 ## merge
 sdata$tip=sdata$species
@@ -345,6 +156,29 @@ cdata$data$tip=cdata$data$species
 
 ## taxonomy
 cdata$data$taxonomy=with(cdata$data,paste(fam,gen,species,sep='; '))
+
+## just sampled bats
+sdata=cdata[cdata$data$binstudy==1,]
+
+## D statistic on sampled/not sampled
+set.seed(1)
+dstat=phylo.d(data=cdata,binvar=binstudy,permut=1000)
+
+## number of studies and number of bats
+hist(log10(sdata$data$studies))
+hist(log10(sdata$data$tested))
+
+## transform
+sdata$data$lstudies=log10(sdata$data$studies)
+sdata$data$ltested=log10(sdata$data$tested)
+
+## pagel's lambda
+pmod1=pgls(lstudies~1,data=sdata,lambda="ML")
+pmod2=pgls(ltested~1,data=sdata,lambda="ML")
+
+## summarize
+summary(pmod1)
+summary(pmod2)
 
 ## Holm rejection procedure
 HolmProcedure <- function(pf,FWER=0.05){
@@ -456,66 +290,47 @@ pfsum=function(pf){
   return(list(set=dat,results=results))
 }
 
-## negbin model fcn
-model.fcn2 <- function(formula,data,...){
-  fit <- tryCatch(MASS::glm.nb(formula,data,...),
-                  error=function(e) NA)
-  #fit <- do.call
-  return(fit)
-}
-
-## negbin objective function
-obj.fcn2 <- function(fit,grp,tree,PartitioningVariables,model.fcn,phyloData,...){
-  #if (!'negbin' %in% class(fit) & !'glm' %in% class(fit) & !'lm' %in% class(fit))
-  if (!'negbin' %in% class(fit))
-  {
-    return(0)
-  }
-  else 
-  {
-    #fit2 <- MASS::glm.nb(Z.poisson~1,data = fit$model)
-    fit$null.deviance-fit$deviance %>% return()
-    #fit$twologlik %>% return()
-  }
-}
-
-## studies: poisson or nb
-mean(cdata$data$studies)
-var(cdata$data$studies)
-
-## tested: poisson or nb
-mean(cdata$data$tested)
-var(cdata$data$tested)
-
-## GPF for studies
+## GPF for study binary
 library(phylofactor)
-library(MASS)
 set.seed(1)
 study_pf=gpf(Data=cdata$data,tree=cdata$phy,
-             frmla.phylo=studies~phylo,
-             model.fcn = model.fcn2,objective.fcn = obj.fcn2,
-             cluster.depends='library(MASS)',
-             algorithm='phylo',nfactors=15)
+             frmla.phylo=binstudy~phylo,
+             family=binomial,
+             algorithm='phylo',nfactors=10,
+             min.group.size = 10)
 
 ## summarize
 HolmProcedure(study_pf)
 study_res=pfsum(study_pf)$results
 
-## number of bats tested
+## number of studies
 set.seed(1)
-tested_pf=gpf(Data=cdata$data,tree=cdata$phy,
-             frmla.phylo=tested~phylo,
-             model.fcn = model.fcn2,objective.fcn = obj.fcn2,
-             cluster.depends='library(MASS)',
-             algorithm='phylo',nfactors=15)
+nstudies_pf=gpf(Data=sdata$data,tree=sdata$phy,
+              frmla.phylo=studies~phylo,
+              family=poisson,
+              algorithm='phylo',nfactors=5,
+              min.group.size = 10)
 
 ## summarize
-HolmProcedure(tested_pf)
-tested_res=pfsum(tested_pf)$results
+HolmProcedure(nstudies_pf)
+nstudies_res=pfsum(nstudies_pf)$results
 
-## save tree
+## number of samples
+set.seed(1)
+nsamples_pf=gpf(Data=sdata$data,tree=sdata$phy,
+                frmla.phylo=sample~phylo,
+                family=poisson,
+                algorithm='phylo',nfactors=25,
+                min.group.size = 10)
+
+## summarize
+HolmProcedure(nsamples_pf)
+nsamples_res=pfsum(nsamples_pf)$results
+
+## save trees
 library(treeio)
 dtree=treeio::full_join(as.treedata(cdata$phy),cdata$data,by="label")
+stree=treeio::full_join(as.treedata(sdata$phy),sdata$data,by="label")
 
 ## set x max
 plus=1
@@ -533,7 +348,7 @@ afun=function(x){
 pcols=afun(2)
 
 ## function to loop and add clades
-cadd=function(gg,pf){
+cadd=function(gg,pf,pmax){
   
   ## ifelse
   if(HolmProcedure(pf)==0){
@@ -542,6 +357,13 @@ cadd=function(gg,pf){
     
     ## make result
     result=pfsum(pf)$results
+    
+    ## ifelse 
+    if(nrow(result)>pmax){
+      result=result[1:pmax,]
+      }else{
+        result=result
+      }
     
     ## set tree
     for(i in 1:nrow(result)){
@@ -556,16 +378,53 @@ cadd=function(gg,pf){
   return(gg)
 }
 
+## state pmax
+pmax=30
+
 ## make base
 library(ggtree)
-base=ggtree(dtree,size=0.1,branch.length='none',layout="circular")
-base
+base=ggtree(dtree,size=0.1)
+base2=ggtree(stree,size=0.1,branch.length='none',layout="circular")
 
-## study tree
-gg=cadd(base,study_pf)
+## binary tree
+gg=cadd(base,study_pf,pmax)
 
 ## get tree data
 tdata=base$data
+
+## tips only
+tdata=tdata[which(tdata$isTip==T),]
+
+## set x max
+xmax=max(tdata$x)+10
+
+## make data frame
+library(scales)
+samp=data.frame(x=tdata$x,
+                y=tdata$y,
+                yend=tdata$y,
+                xend=rescale(tdata$binstudy,c(max(tdata$x),xmax)),
+                species=tdata$species)
+
+## fix gg
+plot1=gg+
+  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.25,alpha=0.5)
+
+## fix plot1
+plot1=gg+
+  geom_tippoint(data=dtree,aes(colour=factor(binstudy),
+                               alpha=factor(binstudy)),
+                shape=15,size=0.75)+
+  guides(colour=F,alpha=F)+
+  scale_alpha_manual(values=c(0,1))+
+  scale_colour_manual(values=c("white","black"))
+plot1=plot1+ggtitle("(a) binary studied")
+
+## number of studies
+gg=cadd(base2,nstudies_pf,pmax)
+
+## get tree data
+tdata=base2$data
 
 ## tips only
 tdata=tdata[which(tdata$isTip==T),]
@@ -582,30 +441,41 @@ samp=data.frame(x=tdata$x,
                 species=tdata$species)
 
 ## fix gg
-gg+
-  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.75,alpha=0.5)
+plot2=gg+
+  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.25,alpha=0.5)
+plot2=plot2+ggtitle(expression(paste("(b) ",log[10]("studies"))))
 
-## get undersampled species
-usamp1=cladeget(study_pf,1)
-usamp2=cladeget(study_pf,2)
-usamps=c(usamp1,usamp2)
+## number of samples
+gg=cadd(base2,nsamples_pf,pmax)
 
-## genera
-usamp1=unique(sapply(strsplit(usamp1," "),function(x) x[1]))
-usamp2=unique(sapply(strsplit(usamp2," "),function(x) x[1]))
+## get tree data
+tdata=base2$data
 
-## load in betacov predictions
-setwd("~/Desktop/Fresnel_Jun")
-new=read.csv("BinaryPredictions.csv")
+## tips only
+tdata=tdata[which(tdata$isTip==T),]
 
-## ensemble T and betacov 0
-new$suspect=ifelse(new$Ensemble==TRUE & new$Betacov==0,1,0)
+## set x max
+xmax=max(tdata$x)+10
 
-## just suspect
-new=new[new$suspect==1,]
+## make data frame
+library(scales)
+samp=data.frame(x=tdata$x,
+                y=tdata$y,
+                yend=tdata$y,
+                xend=rescale(log10(tdata$tested),c(max(tdata$x),xmax)),
+                species=tdata$species)
 
-## which are in poorly studies clades
-usamps[usamps%in%new$Sp]
+## fix gg
+plot3=gg+
+  geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.25,alpha=0.5)
+plot3=plot3+ggtitle(expression(paste("(c) ",log[10]("samples"))))
+
+## patchwork
+library(patchwork)
+plot1|(plot2/plot3)+plot_layout(widths=c(2,1))
+
+## temporary data file
+data=data_all
 
 ## clean countries to match world map
 data$country=revalue(data$country,
@@ -636,19 +506,74 @@ setdiff(set$country,wdata$country)
 
 ## aggregate number of studies and number of bats sampled per country
 library(tidyr)
-set$studies=set$Field.25
 sdata=set %>%
-  #filter(!(studies == "highly diversified coronaviruses in neotropical bats")) %>%
   dplyr::select(studies, species, country, state, site, longitude, latitude, sample_year, start_year, sample) %>%
-  distinct() %>% 
-  group_by(country) %>%
+  dplyr::distinct() %>% 
+  dplyr::group_by(country) %>%
   dplyr::summarize(tested = sum(sample),
-                   studies = n_distinct(studies)) 
+                   studies = dplyr::n_distinct(studies)) 
 adata=data.frame(sdata)
 rm(sdata)
 
+## load georegion
+setwd("~/Desktop/batgap/data")
+geo=read.csv("georegion.csv")
+
+## standardize
+geo$country=geo$name
+geo=geo[c("country","region","sub.region")]
+
+## fix country
+setdiff(adata$country,geo$country)
+geo$country=revalue(geo$country,
+                    c("United States of America"="USA",
+                      "United Kingdom of Great Britain and Northern Ireland"="UK",
+                      "Korea (Democratic People's Republic of)"="Korea",
+                      "Korea, Republic of"="Korea",
+                      "Congo, Democratic Republic of the"="Democratic Republic of the Congo",
+                      "Taiwan, Province of China"="Taiwan",
+                      "Trinidad and Tobago"="Trinidad",
+                      "Viet Nam"="Vietnam"))
+setdiff(adata$country,geo$country)
+
+## merge
+gdata=merge(geo,adata,by="country",all.x=T)
+
+## binary sampling
+gdata$binstudy=ifelse(is.na(gdata$studies),0,1)
+
+## clean
+gdata=gdata[!gdata$region=="",]
+
+## GLM for binary sampling
+mod1=glm(binstudy~region,data=gdata,family=binomial)
+mod1=glm(binstudy~sub.region,data=gdata,family=binomial)
+
+## within sampled GLMs
+gdata2=gdata[gdata$binstudy==1,]
+mod2=glm(studies~region,data=gdata,family=poisson)
+mod3=glm(tested~region,data=gdata,family=poisson)
+
+## R2
+library(performance)
+r2_mcfadden(mod1)
+r2_mcfadden(mod2)
+r2_mcfadden(mod3)
+
+## visreg
+library(visreg)
+visreg(mod1,"region",scale="response")
+visreg(mod2,"region",scale="response")
+visreg(mod3,"region",scale="response")
+
+## posthoc
+library(emmeans)
+s1=emmeans(mod1,list(pairwise~region),level=0.95,adjust="fdr",type="response")
+s2=emmeans(mod2,list(pairwise~region),level=0.95,adjust="fdr",type="response")
+s3=emmeans(mod3,list(pairwise~region),level=0.95,adjust="fdr",type="response")
+
 ## merge with wdata
-cdata=left_join(wdata,adata,by="country",copy=T)
+cdata=dplyr::left_join(wdata,adata,by="country",copy=T)
 
 ## fix test and studied
 cdata$ntested=ifelse(is.na(cdata$tested),0,cdata$tested)
@@ -661,19 +586,18 @@ p1=ggplot(cdata,aes(long,lat))+
   scale_fill_viridis_c(na.value="grey70",option="cividis")+
   coord_map("gilbert",xlim=c(-180,180))+
   theme(legend.position="bottom")+
-  guides(fill=guide_colorbar(title="number of studies",
+  guides(fill=guide_colorbar(title="(a) studies",
                              barwidth = 15))
 
 ## visualize bats
 p2=ggplot(cdata,aes(long,lat))+
-  geom_polygon(aes(group=group,fill=log10(tested)),size=0.1,colour='white')+
+  geom_polygon(aes(group=group,fill=log1p(tested)),size=0.1,colour='white')+
   theme_void()+
   scale_fill_viridis_c(na.value="grey70",option="cividis")+
   coord_map("gilbert",xlim=c(-180,180))+
   theme(legend.position="bottom")+
-  guides(fill=guide_colorbar(title="log10 number of bats",
+  guides(fill=guide_colorbar(title=expression(paste("(b) ",log("samples + 1"))),
                              barwidth = 15))
 
 ## combine
-library(patchwork)
 p1+p2
