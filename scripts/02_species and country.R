@@ -1,7 +1,7 @@
 ## bat coronavirus gap analysis
 ## 02_species and country
 ## danbeck@ou.edu
-## last updated 42522
+## last updated 42622
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -46,6 +46,7 @@ setdiff(data_beta$species,tree$tip.label)
 
 ## trim tree to species in set
 stree=keep.tip(tree,as.character(unique(data_all$species)))
+length(stree$tip.label)
 
 ## number of studies per species: all data
 sdata=sapply(unique(data_all$species),function(x){
