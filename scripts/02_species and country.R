@@ -643,3 +643,8 @@ setwd("~/Desktop/batgap/figures")
 png("taxonomic patterns effort.png",width=6,height=6,units="in",res=600)
 plot1|(plot2/plot3)+plot_layout(widths=c(2,1))
 dev.off()
+
+## supp tables
+setwd("~/Desktop/batgap/supp tables")
+write.csv(nstudies_res,"Table SD.csv")
+write.csv(nsamples_res,"Table SE.csv")
