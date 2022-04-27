@@ -1,7 +1,7 @@
 ## bat coronavirus gap analysis
 ## 02_species and country
 ## danbeck@ou.edu
-## last updated 42622
+## last updated 42722
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -155,6 +155,12 @@ s1=emmeans(mod1,list(pairwise~region),level=0.95,adjust="fdr",type="response")
 s2=emmeans(mod2,list(pairwise~region),level=0.95,adjust="fdr",type="response")
 s3=emmeans(mod3,list(pairwise~region),level=0.95,adjust="fdr",type="response")
 
+## export
+setwd("~/Desktop/batgap/supp tables")
+write.csv(data.frame(s1$`pairwise differences of region`),"Table SA.csv")
+write.csv(data.frame(s2$`pairwise differences of region`),"Table SB.csv")
+write.csv(data.frame(s3$`pairwise differences of region`),"Table SC.csv")
+
 ## merge with wdata
 cdata=dplyr::left_join(wdata,adata,by="country",copy=T)
 
@@ -183,7 +189,10 @@ p2=ggplot(cdata,aes(long,lat))+
                              barwidth = 15))
 
 ## combine
+setwd("~/Desktop/batgap/figures")
+png("geographic patterns effort.png",width=10,height=5,units="in",res=600)
 p1+p2
+dev.off()
 
 ## trim tree to species in set
 stree=keep.tip(tree,as.character(unique(data_all$species)))
@@ -441,7 +450,7 @@ set.seed(1)
 study_pf=gpf(Data=cdata$data,tree=cdata$phy,
              frmla.phylo=binstudy~phylo,
              family=binomial,
-             algorithm='phylo',nfactors=10,
+             algorithm='phylo',nfactors=2,
              min.group.size = 10)
 
 ## summarize
@@ -465,7 +474,7 @@ set.seed(1)
 nsamples_pf=gpf(Data=sdata$data,tree=sdata$phy,
                 frmla.phylo=sample~phylo,
                 family=poisson,
-                algorithm='phylo',nfactors=25,
+                algorithm='phylo',nfactors=24,
                 min.group.size = 10)
 
 ## summarize
@@ -510,25 +519,34 @@ cadd=function(gg,pf,pmax){
     ## ifelse 
     if(nrow(result)>pmax){
       result=result[1:pmax,]
-      }else{
-        result=result
-      }
+    }else{
+      result=result
+    }
     
     ## set tree
     for(i in 1:nrow(result)){
       
+      ## highlight clade
       gg=gg+
         geom_hilight(node=result$node[i],
                      alpha=0.25,
                      fill=ifelse(result$clade>
-                                   result$other,pcols[2],pcols[1])[i])
+                                   result$other,pcols[2],pcols[1])[i])+
+        
+        ## add label
+        geom_cladelabel(node = result$node[i], 
+                        label = result$factor[i], 
+                        offset = 10, 
+                        offset.text = 6,
+                        fontsize=2.5)
+      
     }
   }
   return(gg)
 }
 
 ## state pmax
-pmax=30
+pmax=10
 
 ## make base
 library(ggtree)
@@ -619,6 +637,9 @@ plot3=gg+
   geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.25,alpha=0.5)
 plot3=plot3+ggtitle(expression(paste("(c) ",log[10]("samples"))))
 
-## patchwork
+## patchwork and export
 library(patchwork)
+setwd("~/Desktop/batgap/figures")
+png("taxonomic patterns effort.png",width=6,height=6,units="in",res=600)
 plot1|(plot2/plot3)+plot_layout(widths=c(2,1))
+dev.off()
