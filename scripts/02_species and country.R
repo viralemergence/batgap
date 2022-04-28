@@ -1,7 +1,7 @@
 ## bat coronavirus gap analysis
 ## 02_species and country
 ## danbeck@ou.edu
-## last updated 42522
+## last updated 42722
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -44,8 +44,159 @@ setdiff(data_all$species,tree$tip.label)
 setdiff(data_alpha$species,tree$tip.label)
 setdiff(data_beta$species,tree$tip.label)
 
+## temporary data file
+data=data_all
+
+## clean countries to match world map
+data$country=revalue(data$country,
+                     c("Malaysian Borneo"="Malaysia",
+                       "Lao PDR"="Laos",
+                       "United States of America"="USA",
+                       "United Kingdom"="UK",
+                       "East Timor"="Timor-Leste",
+                       "South Korea"="Korea"))
+
+## countries
+length(unique(data$country))
+
+## load in global map
+library(maptools)
+wdata=map_data("world")
+wdata=wdata[-which(wdata$region=='Antarctica'),]
+wdata$country=wdata$region
+
+## fix Korea
+wdata$country=revalue(wdata$country,
+                      c("South Korea"="Korea",
+                        "North Korea"="Korea"))
+
+## find difference
+missing=setdiff(unique(data$country),unique(wdata$country))
+
+## trim from data
+set=data[!data$country%in%missing,]
+setdiff(set$country,wdata$country)
+length(unique(set$country))
+
+## aggregate number of studies and number of bats sampled per country
+library(tidyr)
+sdata=set %>%
+  dplyr::select(studies, species, country, state, site, longitude, latitude, sample_year, start_year, sample) %>%
+  dplyr::distinct() %>% 
+  dplyr::group_by(country) %>%
+  dplyr::summarize(tested = sum(sample),
+                   studies = dplyr::n_distinct(studies)) 
+adata=data.frame(sdata)
+rm(sdata)
+
+## load georegion
+setwd("~/Desktop/batgap/data")
+geo=read.csv("georegion.csv")
+
+## standardize
+geo$country=geo$name
+geo=geo[c("country","region","sub.region")]
+
+## fix country
+setdiff(adata$country,geo$country)
+geo$country=revalue(geo$country,
+                    c("United States of America"="USA",
+                      "United Kingdom of Great Britain and Northern Ireland"="UK",
+                      "Korea (Democratic People's Republic of)"="Korea",
+                      "Korea, Republic of"="Korea",
+                      "Congo, Democratic Republic of the"="Democratic Republic of the Congo",
+                      "Taiwan, Province of China"="Taiwan",
+                      "Trinidad and Tobago"="Trinidad",
+                      "Viet Nam"="Vietnam"))
+setdiff(adata$country,geo$country)
+
+## merge
+gdata=merge(geo,adata,by="country",all.x=T)
+
+## binary sampling
+gdata$binstudy=ifelse(is.na(gdata$studies),0,1)
+
+## clean
+gdata=gdata[!gdata$region=="",]
+
+## GLM for binary sampling
+mod1=glm(binstudy~region,data=gdata,family=binomial)
+
+## within sampled GLMs
+gdata2=gdata[gdata$binstudy==1,]
+mod2=glm(studies~region,data=gdata2,family=poisson)
+mod3=glm(tested~region,data=gdata2,family=poisson)
+
+## range
+range(gdata2$studies)
+range(gdata2$tested)
+
+## Anova
+library(car)
+Anova(mod1)
+Anova(mod2)
+Anova(mod3)
+
+## R2
+library(performance)
+r2_mcfadden(mod1)
+r2_mcfadden(mod2)
+r2_mcfadden(mod3)
+
+## visreg
+library(visreg)
+visreg(mod1,"region",scale="response")
+visreg(mod2,"region",scale="response")
+visreg(mod3,"region",scale="response")
+
+## posthoc
+library(emmeans)
+s1=emmeans(mod1,list(pairwise~region),level=0.95,adjust="fdr",type="response")
+s2=emmeans(mod2,list(pairwise~region),level=0.95,adjust="fdr",type="response")
+s3=emmeans(mod3,list(pairwise~region),level=0.95,adjust="fdr",type="response")
+
+## export
+setwd("~/Desktop/batgap/supp tables")
+write.csv(data.frame(s1$`pairwise differences of region`),"Table SA.csv")
+write.csv(data.frame(s2$`pairwise differences of region`),"Table SB.csv")
+write.csv(data.frame(s3$`pairwise differences of region`),"Table SC.csv")
+
+## merge with wdata
+cdata=dplyr::left_join(wdata,adata,by="country",copy=T)
+
+## fix test and studied
+cdata$ntested=ifelse(is.na(cdata$tested),0,cdata$tested)
+cdata$nstudies=ifelse(is.na(cdata$studies),0,cdata$studies)
+
+## visualize studies
+p1=ggplot(cdata,aes(long,lat))+
+  geom_polygon(aes(group=group,fill=studies),size=0.1,colour='white')+
+  theme_void()+
+  scale_fill_viridis_c(na.value="grey70",option="cividis")+
+  coord_map("gilbert",xlim=c(-180,180))+
+  theme(legend.position="bottom")+
+  guides(fill=guide_colorbar(title="(a) studies",
+                             barwidth = 15))
+
+## visualize bats
+p2=ggplot(cdata,aes(long,lat))+
+  geom_polygon(aes(group=group,fill=log1p(tested)),size=0.1,colour='white')+
+  theme_void()+
+  scale_fill_viridis_c(na.value="grey70",option="cividis")+
+  coord_map("gilbert",xlim=c(-180,180))+
+  theme(legend.position="bottom")+
+  guides(fill=guide_colorbar(title=expression(paste("(b) ",log("samples + 1"))),
+                             barwidth = 15))
+
+## combine
+setwd("~/Desktop/batgap/figures")
+png("geographic patterns effort.png",width=10,height=5,units="in",res=600)
+p1+p2
+dev.off()
+
 ## trim tree to species in set
 stree=keep.tip(tree,as.character(unique(data_all$species)))
+length(stree$tip.label)
 
 ## number of studies per species: all data
 sdata=sapply(unique(data_all$species),function(x){
@@ -172,6 +323,9 @@ hist(log10(sdata$data$tested))
 sdata$data$lstudies=log10(sdata$data$studies)
 sdata$data$ltested=log10(sdata$data$tested)
 
+## range
+range(sdata$data$studies)
+
 ## pagel's lambda
 pmod1=pgls(lstudies~1,data=sdata,lambda="ML")
 pmod2=pgls(ltested~1,data=sdata,lambda="ML")
@@ -296,7 +450,7 @@ set.seed(1)
 study_pf=gpf(Data=cdata$data,tree=cdata$phy,
              frmla.phylo=binstudy~phylo,
              family=binomial,
-             algorithm='phylo',nfactors=10,
+             algorithm='phylo',nfactors=2,
              min.group.size = 10)
 
 ## summarize
@@ -320,12 +474,16 @@ set.seed(1)
 nsamples_pf=gpf(Data=sdata$data,tree=sdata$phy,
                 frmla.phylo=sample~phylo,
                 family=poisson,
-                algorithm='phylo',nfactors=25,
+                algorithm='phylo',nfactors=24,
                 min.group.size = 10)
 
 ## summarize
 HolmProcedure(nsamples_pf)
 nsamples_res=pfsum(nsamples_pf)$results
+
+## lower/greater
+nsamples_res$check=ifelse(nsamples_res$clade>nsamples_res$other,"more","less")
+table(nsamples_res$check)
 
 ## save trees
 library(treeio)
@@ -361,25 +519,34 @@ cadd=function(gg,pf,pmax){
     ## ifelse 
     if(nrow(result)>pmax){
       result=result[1:pmax,]
-      }else{
-        result=result
-      }
+    }else{
+      result=result
+    }
     
     ## set tree
     for(i in 1:nrow(result)){
       
+      ## highlight clade
       gg=gg+
         geom_hilight(node=result$node[i],
                      alpha=0.25,
                      fill=ifelse(result$clade>
-                                   result$other,pcols[2],pcols[1])[i])
+                                   result$other,pcols[2],pcols[1])[i])+
+        
+        ## add label
+        geom_cladelabel(node = result$node[i], 
+                        label = result$factor[i], 
+                        offset = 10, 
+                        offset.text = 6,
+                        fontsize=2.5)
+      
     }
   }
   return(gg)
 }
 
 ## state pmax
-pmax=30
+pmax=10
 
 ## make base
 library(ggtree)
@@ -470,134 +637,14 @@ plot3=gg+
   geom_segment(data=samp,aes(x=x,y=y,xend=xend,yend=yend),size=0.25,alpha=0.5)
 plot3=plot3+ggtitle(expression(paste("(c) ",log[10]("samples"))))
 
-## patchwork
+## patchwork and export
 library(patchwork)
+setwd("~/Desktop/batgap/figures")
+png("taxonomic patterns effort.png",width=6,height=6,units="in",res=600)
 plot1|(plot2/plot3)+plot_layout(widths=c(2,1))
+dev.off()
 
-## temporary data file
-data=data_all
-
-## clean countries to match world map
-data$country=revalue(data$country,
-                  c("Malaysian Borneo"="Malaysia",
-                    "Lao PDR"="Laos",
-                    "United States of America"="USA",
-                    "United Kingdom"="UK",
-                    "East Timor"="Timor-Leste",
-                    "South Korea"="Korea"))
-
-## load in global map
-library(maptools)
-wdata=map_data("world")
-wdata=wdata[-which(wdata$region=='Antarctica'),]
-wdata$country=wdata$region
-
-## fix Korea
-wdata$country=revalue(wdata$country,
-                      c("South Korea"="Korea",
-                        "North Korea"="Korea"))
-
-## find difference
-missing=setdiff(unique(data$country),unique(wdata$country))
-
-## trim from data
-set=data[!data$country%in%missing,]
-setdiff(set$country,wdata$country)
-
-## aggregate number of studies and number of bats sampled per country
-library(tidyr)
-sdata=set %>%
-  dplyr::select(studies, species, country, state, site, longitude, latitude, sample_year, start_year, sample) %>%
-  dplyr::distinct() %>% 
-  dplyr::group_by(country) %>%
-  dplyr::summarize(tested = sum(sample),
-                   studies = dplyr::n_distinct(studies)) 
-adata=data.frame(sdata)
-rm(sdata)
-
-## load georegion
-setwd("~/Desktop/batgap/data")
-geo=read.csv("georegion.csv")
-
-## standardize
-geo$country=geo$name
-geo=geo[c("country","region","sub.region")]
-
-## fix country
-setdiff(adata$country,geo$country)
-geo$country=revalue(geo$country,
-                    c("United States of America"="USA",
-                      "United Kingdom of Great Britain and Northern Ireland"="UK",
-                      "Korea (Democratic People's Republic of)"="Korea",
-                      "Korea, Republic of"="Korea",
-                      "Congo, Democratic Republic of the"="Democratic Republic of the Congo",
-                      "Taiwan, Province of China"="Taiwan",
-                      "Trinidad and Tobago"="Trinidad",
-                      "Viet Nam"="Vietnam"))
-setdiff(adata$country,geo$country)
-
-## merge
-gdata=merge(geo,adata,by="country",all.x=T)
-
-## binary sampling
-gdata$binstudy=ifelse(is.na(gdata$studies),0,1)
-
-## clean
-gdata=gdata[!gdata$region=="",]
-
-## GLM for binary sampling
-mod1=glm(binstudy~region,data=gdata,family=binomial)
-mod1=glm(binstudy~sub.region,data=gdata,family=binomial)
-
-## within sampled GLMs
-gdata2=gdata[gdata$binstudy==1,]
-mod2=glm(studies~region,data=gdata,family=poisson)
-mod3=glm(tested~region,data=gdata,family=poisson)
-
-## R2
-library(performance)
-r2_mcfadden(mod1)
-r2_mcfadden(mod2)
-r2_mcfadden(mod3)
-
-## visreg
-library(visreg)
-visreg(mod1,"region",scale="response")
-visreg(mod2,"region",scale="response")
-visreg(mod3,"region",scale="response")
-
-## posthoc
-library(emmeans)
-s1=emmeans(mod1,list(pairwise~region),level=0.95,adjust="fdr",type="response")
-s2=emmeans(mod2,list(pairwise~region),level=0.95,adjust="fdr",type="response")
-s3=emmeans(mod3,list(pairwise~region),level=0.95,adjust="fdr",type="response")
-
-## merge with wdata
-cdata=dplyr::left_join(wdata,adata,by="country",copy=T)
-
-## fix test and studied
-cdata$ntested=ifelse(is.na(cdata$tested),0,cdata$tested)
-cdata$nstudies=ifelse(is.na(cdata$studies),0,cdata$studies)
-
-## visualize studies
-p1=ggplot(cdata,aes(long,lat))+
-  geom_polygon(aes(group=group,fill=studies),size=0.1,colour='white')+
-  theme_void()+
-  scale_fill_viridis_c(na.value="grey70",option="cividis")+
-  coord_map("gilbert",xlim=c(-180,180))+
-  theme(legend.position="bottom")+
-  guides(fill=guide_colorbar(title="(a) studies",
-                             barwidth = 15))
-
-## visualize bats
-p2=ggplot(cdata,aes(long,lat))+
-  geom_polygon(aes(group=group,fill=log1p(tested)),size=0.1,colour='white')+
-  theme_void()+
-  scale_fill_viridis_c(na.value="grey70",option="cividis")+
-  coord_map("gilbert",xlim=c(-180,180))+
-  theme(legend.position="bottom")+
-  guides(fill=guide_colorbar(title=expression(paste("(b) ",log("samples + 1"))),
-                             barwidth = 15))
-
-## combine
-p1+p2
+## supp tables
+setwd("~/Desktop/batgap/supp tables")
+write.csv(nstudies_res,"Table SD.csv")
+write.csv(nsamples_res,"Table SE.csv")
