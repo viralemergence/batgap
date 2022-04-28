@@ -147,6 +147,9 @@ data$longitudedecimal <- revalue(data$longitudedecimal, c("-1º33'41\"E"=angle2d
 unique(data$longitudedecimal)
 data$longitudedecimal <- as.numeric(data$longitudedecimal)
 
+#fix gene targets
+unique(data$gene_targets)
+data$gene_targets[which(data$gene_targets=="")] <- "NA"
 
 #add euthanasia column
 data$title <- gsub('[\"]', '', data$title)
@@ -477,7 +480,6 @@ set_other <- set_other[-which(set_other$virus_genus_simplified== "coinfection"),
 set_infection_prev_alphaonly <- set_infection_prev[c(which(set_infection_prev$virus_genus_simplified=="alphacoronavirus"),which(set_infection_prev$virus_genus_simplified=="genus not specified" & set_infection_prev$positives==0)),,] 
 set_infection_prev_betaonly <- set_infection_prev[c(which(set_infection_prev$virus_genus_simplified=="betacoronavirus"),which(set_infection_prev$virus_genus_simplified=="genus not specified" & set_infection_prev$positives==0)),,]
 
-
 #2) other analyses
 set_other_alphaonly <- set_other[c(which(set_other$virus_genus_simplified=="alphacoronavirus"),which(set_other$virus_genus_simplified=="genus not specified" & set_other$positives==0)),,] 
 set_other_betaonly <- set_other[c(which(set_other$virus_genus_simplified=="betacoronavirus"),which(set_other$virus_genus_simplified=="genus not specified" & set_other$positives==0)),,]
@@ -604,11 +606,5 @@ write.csv(set_infection_prev_betaonly,"~/Documents/GitHub/batgap/data/set_infect
 write.csv(set_other,"~/Documents/GitHub/batgap/data/set_other.csv")
 write.csv(set_other_alphaonly,"~/Documents/GitHub/batgap/data/set_other_alphaonly.csv")
 write.csv(set_other_betaonly,"~/Documents/GitHub/batgap/data/set_other_betaonly.csv")
-
-
-
-#ready for models
-
-
 
 
