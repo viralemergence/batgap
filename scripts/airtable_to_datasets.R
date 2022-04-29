@@ -16,7 +16,7 @@ library(cowplot)
 ##set working directory 
 setwd("~/Documents/GitHub/batgap/data")
 
-##Airtable as of April 26, 2022
+##Airtable as of April 29, 2022
 data <- read.csv("airtable.csv")
 
 #add column with simplified tissues
@@ -81,7 +81,68 @@ data$tissue_simplified<-revalue(data$tissue_simplified,
                                   "respiratory/fecal swab"="pooled swabs/samples",
                                   "oral swab,fecal swab"="pooled swabs/samples"))
 unique(data$tissue_simplified)
-unique(data$country)
+
+#add column with extremely simplified tissue sample (swab, tissue, faeces, sera, pooled (swab/tissue))
+data$sample_simplified<-data$tissue
+data$sample_simplified<-revalue(data$sample_simplified,
+                                c("rectal swab"="swab",
+                                  "oral swab"="swab",
+                                  "blood"="sera",
+                                  "enteric content"="tissue",
+                                  "intestines"="tissue",
+                                  "lung"="tissue",
+                                  "faeces"="faeces",
+                                  "liver"="tissue",
+                                  "faeces/anal swab"="pooled",
+                                  "rectal/oral swab"="swab",
+                                  "serum"="sera",
+                                  "faecal swab"="swab",
+                                  "respiratory swab"="swab",
+                                  "faecal swab/faeces"="pooled",
+                                  "alimentary specimen"="tissue",
+                                  "respiratory specimen"="tissue",
+                                  "faeces or urine swab"="pooled",
+                                  "urine swab"="swab",
+                                  "faecal and/or throat sample"="pooled",
+                                  "rectal/oral swab,serum"="pooled",
+                                  "urine"="tissue",
+                                  "faeces or anal swab or intestinal content or oropharyngeal swab"="pooled",
+                                  "faeces or rectal tissue/swab"="pooled",
+                                  "throat swab"="swab",
+                                  "anal swab"="swab",
+                                  "roost feces"="faeces",
+                                  "roost feces,faeces"="faeces",
+                                  "pooled tissue (liver/lung/small intestine/brain/kidney/spleen)"="tissue",
+                                  "faeces or urine"="pooled",
+                                  "fecal swab"="swab",
+                                  "fecal pellets"="faeces",
+                                  "\"saliva, faeces, and urine samples\""="pooled",
+                                  "anal swabs/faecal samples"="pooled",
+                                  "faecal samples"="faeces",
+                                  "anal swab,nasopharyngeal swabs"="swab",
+                                  "skin swab"="swab",
+                                  "guano"="faeces",
+                                  "oral swab,alimentary specimen"="pooled",
+                                  "intestines,spleen"="tissue",
+                                  "fecal pellets,anal swab"="pooled",
+                                  "anal swab,oral swab"="swab",
+                                  "faecal swab/pellet"="pooled",
+                                  "faeces or rectal swab"="pooled",
+                                  "oral swab,rectal swab,serum"="pooled",
+                                  "intestines,lung"="tissue",
+                                  "nasopharyngeal swabs,faecal swab"="swab",
+                                  "pharyngeal/anal swab"="swab",
+                                  "Carcass"="tissue",
+                                  "oral swab,\"tissue (lung,liver,spleen)\""="pooled",
+                                  "nasopharyngeal swabs,anal swab"="swab",
+                                  "fecal pellets,rectal swab,oral swab"="pooled",
+                                  "fecal pellets,oral swab"="pooled",
+                                  "rectal swab,oral swab"="swab",
+                                  "faeces,oral swab"="pooled",
+                                  "oral swab,rectal swab"="swab",
+                                  "respiratory/fecal swab"="swab",
+                                  "oral swab,fecal swab"="swab"))
+unique(data$sample_simplified)
 
 #add seasons
 data$summer <- data$sample_season_simplified
@@ -147,9 +208,13 @@ data$longitudedecimal <- revalue(data$longitudedecimal, c("-1º33'41\"E"=angle2d
 unique(data$longitudedecimal)
 data$longitudedecimal <- as.numeric(data$longitudedecimal)
 
-#fix gene targets
+#add simplified gene target column (RdRp, Other, RdRp_Other)
 unique(data$gene_targets)
 data$gene_targets[which(data$gene_targets=="")] <- "NA"
+data$gene_targets_simplified <- data$gene_targets
+data$gene_targets_simplified <- revalue(data$gene_targets_simplified, c("ORF 1b"="Other","RdRp: nsP12"="RdRp","ORF SARS-Cov Tor2"="Other","UpE, Orf1a, RdRp, N"="RdRp_Other","ORF1b"="Other","RdRp "="RdRp","N3"="Other","E, RdRp"="RdRp_Other","S1"="Other","RdRP"="RdRp","N1, N2, N3"="Other","S"="Other","RdRp-1"="RdRp","RdRp-2"="RdRp","Recombinant BtCoV nucleocapsid (N) protein used as antigen"="Other","His6-Tagged recombinant N protein of bat-SARS-CoV"="Other","N"="Other"))
+
+unique(data$gene_targets_simplified)
 
 #add euthanasia column
 data$title <- gsub('[\"]', '', data$title)
@@ -250,7 +315,7 @@ data$euthanasia<-revalue(data$euthanasia,
                                   "novel coronaviruses, astroviruses, adenoviruses and circoviruses in insectivorous bats from northern china"="Yes, for this study",
                                   "persistent infections support maintenance of a coronavirus in a population of australian bats (myotis macropus)"="No",
                                   "prevalence and genetic diversity of coronaviruses in bats from china"="No",
-                                  "rapid detection of mers coronavirus-like viruses in bats: pote1ntial for tracking mers coronavirus transmission and animal origin"="N/A (samples from previous study used)",
+                                  "rapid detection of mers coronavirus-like viruses in bats: potential for tracking mers coronavirus transmission and animal origin"="N/A (samples from previous study used)",
                                   "recent transmission of a novel alphacoronavirus, bat coronavirus hku10, from leschenault's rousettes to pomona leaf-nosed bats: first evidence of interspecies transmission of coronavirus between bats of different suborders"="Yes, for this study",
                                   "sars-coronavirus ancestor's foot-prints in south-east asian bat colonies and the refuge theory"="No",
                                   "sars-cov related betacoronavirus and diverse alphacoronavirus members found in western old-world"="No",
