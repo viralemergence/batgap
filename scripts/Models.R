@@ -122,18 +122,34 @@ i2(model_beta_nomods)
 
 
 #datasets for following models/aic
-set_infection_prev_nona <- set_infection_prev[-which(is.na(set_infection_prev$summer)),,]
-set_infection_prev_alphaonly_nona <- set_infection_prev_alphaonly[-which(is.na(set_infection_prev_alphaonly$summer)),,]
-set_infection_prev_betaonly_nona <- set_infection_prev_betaonly[-which(is.na(set_infection_prev_betaonly$summer)),,]
-set_infection_prev_nona <- set_infection_prev_nona[,c(1:59,67)]
-set_infection_prev_alphaonly_nona <- set_infection_prev_alphaonly_nona[,c(1:59,67)]
-set_infection_prev_betaonly_nona <- set_infection_prev_betaonly_nona[,c(1:59,67)]
+set_infection_prevalence_nona <- set_infection_prevalence[-which(is.na(set_infection_prevalence$summer)),,]
+set_infection_prevalence_alphaonly_nona <- set_infection_prevalence_alphaonly[-which(is.na(set_infection_prevalence_alphaonly$summer)),,]
+set_infection_prevalence_betaonly_nona <- set_infection_prevalence_betaonly[-which(is.na(set_infection_prevalence_betaonly$summer)),,]
+colnames(set_infection_prevalence_nona)
+set_infection_prevalence_nona <- set_infection_prevalence_nona[,c(1:59,68)]
+set_infection_prevalence_alphaonly_nona <- set_infection_prevalence_alphaonly_nona[,c(1:59,68)]
+set_infection_prevalence_betaonly_nona <- set_infection_prevalence_betaonly_nona[,c(1:59,68)]
 
 #infection prevalence analyses
 ## trim tree to species in set
-stree1a=keep.tip(tree,as.character(unique(set_infection_prev_nona$species)))
-stree2b=keep.tip(tree,as.character(unique(set_infection_prev_alphaonly_nona$species)))
-stree3c=keep.tip(tree,as.character(unique(set_infection_prev_betaonly_nona$species)))
+tree <- read.nexus("MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre")
+## load in taxonomy
+taxa=read.csv('taxonomy_mamPhy_5911species.csv',header=T)
+taxa=taxa[taxa$ord=="CHIROPTERA",]
+taxa$tip=taxa$Species_Name
+taxa$tip <- as.character(taxa$tip)
+taxa$fam <- as.character(taxa$fam)
+
+## trim phylo to bats
+taxa$tiplabel <- as.character(taxa$tiplabel)
+tree <- keep.tip(tree,taxa$tiplabel)
+
+## fix tip
+tree$tip.label=sapply(strsplit(tree$tip.label,'_'),function(x) paste(x[1],x[2],sep=' '))
+taxa$species=sapply(strsplit(taxa$tip,'_'),function(x) paste(x[1],x[2],sep=' '))
+stree1a=keep.tip(tree,as.character(unique(set_infection_prevalence_nona$species)))
+stree2b=keep.tip(tree,as.character(unique(set_infection_prevalence_alphaonly_nona$species)))
+stree3c=keep.tip(tree,as.character(unique(set_infection_prevalence_betaonly_nona$species)))
 
 ## convert tree to correlation matrix
 #all genera
@@ -145,43 +161,84 @@ cmatrix3c=vcv.phylo(stree3c,cor=T)
 
 ## make observation and study-level random effect
 #all genera
-set_infection_prev_nona$observation=factor(1:nrow(set_infection_prev_nona))
-set_infection_prev_nona$study=factor(set_infection_prev_nona$title)
+set_infection_prevalence_nona$observation=factor(1:nrow(set_infection_prevalence_nona))
+set_infection_prevalence_nona$study=factor(set_infection_prevalence_nona$title)
 #alpha only
-set_infection_prev_alphaonly_nona$observation=factor(1:nrow(set_infection_prev_alphaonly_nona))
-set_infection_prev_alphaonly_nona$study=factor(set_infection_prev_alphaonly_nona$title)
+set_infection_prevalence_alphaonly_nona$observation=factor(1:nrow(set_infection_prevalence_alphaonly_nona))
+set_infection_prevalence_alphaonly_nona$study=factor(set_infection_prevalence_alphaonly_nona$title)
 #beta only
-set_infection_prev_betaonly_nona$observation=factor(1:nrow(set_infection_prev_betaonly_nona))
-set_infection_prev_betaonly_nona$study=factor(set_infection_prev_betaonly_nona$title)
+set_infection_prevalence_betaonly_nona$observation=factor(1:nrow(set_infection_prevalence_betaonly_nona))
+set_infection_prevalence_betaonly_nona$study=factor(set_infection_prevalence_betaonly_nona$title)
 
 ## pft in escalc for yi and vi 
 #all genera
-set_infection_prev_nona=data.frame(set_infection_prev_nona,escalc(xi=set_infection_prev_nona$positives,ni=set_infection_prev_nona$sample,measure="PFT"))
+set_infection_prevalence_nona=data.frame(set_infection_prevalence_nona,escalc(xi=set_infection_prevalence_nona$positives,ni=set_infection_prevalence_nona$sample,measure="PFT"))
 #alpha only
-set_infection_prev_alphaonly_nona=data.frame(set_infection_prev_alphaonly_nona,escalc(xi=set_infection_prev_alphaonly_nona$positives,ni=set_infection_prev_alphaonly_nona$sample,measure="PFT"))
+set_infection_prevalence_alphaonly_nona=data.frame(set_infection_prevalence_alphaonly_nona,escalc(xi=set_infection_prevalence_alphaonly_nona$positives,ni=set_infection_prevalence_alphaonly_nona$sample,measure="PFT"))
 #beta only
-set_infection_prev_betaonly_nona=data.frame(set_infection_prev_betaonly_nona,escalc(xi=set_infection_prev_betaonly_nona$positives,ni=set_infection_prev_betaonly_nona$sample,measure="PFT"))
+set_infection_prevalence_betaonly_nona=data.frame(set_infection_prevalence_betaonly_nona,escalc(xi=set_infection_prevalence_betaonly_nona$positives,ni=set_infection_prevalence_betaonly_nona$sample,measure="PFT"))
 
 ## back transform
 #all genera
-set_infection_prev_nona$backtrans=transf.ipft(set_infection_prev_nona$yi,set_infection_prev_nona$sample)
+set_infection_prevalence_nona$backtrans=transf.ipft(set_infection_prevalence_nona$yi,set_infection_prevalence_nona$sample)
 #alpha only
-set_infection_prev_alphaonly_nona$backtrans=transf.ipft(set_infection_prev_alphaonly_nona$yi,set_infection_prev_alphaonly_nona$sample)
+set_infection_prevalence_alphaonly_nona$backtrans=transf.ipft(set_infection_prevalence_alphaonly_nona$yi,set_infection_prevalence_alphaonly_nona$sample)
 #beta only
-set_infection_prev_betaonly_nona$backtrans=transf.ipft(set_infection_prev_betaonly_nona$yi,set_infection_prev_betaonly_nona$sample)
+set_infection_prevalence_betaonly_nona$backtrans=transf.ipft(set_infection_prevalence_betaonly_nona$yi,set_infection_prevalence_betaonly_nona$sample)
 
 ## species and phylo effect
 #all genera
-set_infection_prev_nona$phylo=set_infection_prev_nona$species
-set_infection_prev_nona$species=set_infection_prev_nona$phylo
+set_infection_prevalence_nona$phylo=set_infection_prevalence_nona$species
+set_infection_prevalence_nona$species=set_infection_prevalence_nona$phylo
 #alpha only
-set_infection_prev_alphaonly_nona$phylo=set_infection_prev_alphaonly_nona$species
-set_infection_prev_alphaonly_nona$species=set_infection_prev_alphaonly_nona$phylo
+set_infection_prevalence_alphaonly_nona$phylo=set_infection_prevalence_alphaonly_nona$species
+set_infection_prevalence_alphaonly_nona$species=set_infection_prevalence_alphaonly_nona$phylo
 #beta only
-set_infection_prev_betaonly_nona$phylo=set_infection_prev_betaonly_nona$species
-set_infection_prev_betaonly_nona$species=set_infection_prev_betaonly_nona$phylo
+set_infection_prevalence_betaonly_nona$phylo=set_infection_prevalence_betaonly_nona$species
+set_infection_prevalence_betaonly_nona$species=set_infection_prevalence_betaonly_nona$phylo
 
 #covariates = study_type, family, single.multiple.PCR.method, tissue_simplified/sample_simplified, detection_method, euthanasia_simplified, summer/winter/spring/fall, detection_type, gene_targets_simplified
+
+
+table(set_infection_prev_nona$detection_type, set_infection_prev_nona$gene_targets_simplified)
+#two zeros in study_type vs. family
+#no zeros in study_type vs single/multiple/pcr, no zeros in study_type vs season, no zeros in study_type vs. euthanasia
+#two zeros in study_type vs. detection_type
+#five zeros in study_type vs. tissue_simplified
+#one zero in study_type vs sample_simplified
+#one zero in study_type vs. detection_method
+#one zero in study_type vs. gene_targets_simplified
+#three zeros in family vs. single multiple PCR
+#lots of zeros in family vs. tissue simplified & family vs. sample_simplified
+#lots of zeros in family vs. detection_method / detection_type
+#three zeros in family vs. euthanasia
+#lots of zeros in family vs. gene_targets_simplified
+#lots of zeros in family vs. winter, 1 in family vs. fall, 3 in family vs. summer/spring
+#four zeros in single/multiple PCR vs tissue 
+#one zero in single/multiple PCR vs sample
+#one zero in single/multiple PCR vs detection_method, gene_targets
+#no zeros in single/multiple PCR vs detection_type, no zeros in single/multiple PCR vs euthanasia, season
+#lots of zeros in tissue vs sample, tissue vs detection_method, tissue vs detection_type, tissue vs gene targets; four in tissue vs euthanasia, three in tissue vs season
+#lots of zeros in sample vs detection_method, two in sample vs detection_type, one in sample vs euthanasia, one in sample vs season, lots in sample vs gene 
+#one zero in detection method vs euthanasia, two in detection method vs gene, two in detection method vs detection type, one in detection method vs season
+#none in euthanasia vs detection type, none in euthanasia vs gene, none in euthanasia vs season
+#one in season vs gene, none in season vs detection_type, one in detection_type vs gene
+
+#min glob model = single.multiple.PCR, euthanasia, season
+
+model_all_nocol_a=rma.mv(yi=yi,V=vi,
+                  random=list(~1|study/observation,~1|species,~1|phylo),
+                  R=list(phylo=cmatrix1a),
+                  method="ML",mods=~study_type + single.multiple.PCR.method + euthanasia_simplified + summer + winter + fall + spring, data=set_infection_prev_nona,
+                  control=list(optimizer="optim", optmethod="BFGS"))
+model_all_nocol_b=rma.mv(yi=yi,V=vi,
+                  random=list(~1|study/observation,~1|species,~1|phylo),
+                  R=list(phylo=cmatrix1a),
+                  method="ML",mods=~detection_type + single.multiple.PCR.method + euthanasia_simplified + summer + winter + fall + spring, data=set_infection_prev_nona,
+                  control=list(optimizer="optim", optmethod="BFGS"))
+
+list <- c("study_type","family","single.multiple.PCR.method","tissue_simplified","sample_simplified","detection_method","euthanasia_simplified","season","detection_type","gene_targets_simplified")
+DescTools::CombSet(list, m=2) 
 
 ###all cov models
 model_all1=rma.mv(yi=yi,V=vi,
@@ -405,221 +462,301 @@ model_beta12=rma.mv(yi=yi,V=vi,
 ###all cov models w gene targets
 model_all1gene=rma.mv(yi=yi,V=vi,
                   random=list(~1|study/observation,~1|species,~1|phylo),
-                  R=list(phylo=cmatrix1),
+                  R=list(phylo=cmatrix1a),
                   method="ML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                   control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all2gene=rma.mv(yi=yi,V=vi,
                   random=list(~1|study/observation,~1|species,~1|phylo),
-                  R=list(phylo=cmatrix1),
+                  R=list(phylo=cmatrix1a),
                   method="ML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                   control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all3gene=rma.mv(yi=yi,V=vi,
                   random=list(~1|study/observation,~1|species,~1|phylo),
-                  R=list(phylo=cmatrix1),
+                  R=list(phylo=cmatrix1a),
                   method="ML",mods=~study_type + single.multiple.PCR.method + euthanasia_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                   control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all4gene=rma.mv(yi=yi,V=vi,
                   random=list(~1|study/observation,~1|species,~1|phylo),
-                  R=list(phylo=cmatrix1),
-                  method="ML",mods=~detection_type + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
+                  R=list(phylo=cmatrix1a),
+                  method="REML",mods=~detection_type + detection_method + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                   control=list(optimizer="optim", optmethod="BFGS"))
+
+#model_all4genealpha=rma.mv(yi=yi,V=vi,
+                      #random=list(~1|study/observation,~1|species,~1|phylo),
+                      #R=list(phylo=cmatrix2b),
+                      #method="REML",mods=~detection_type + detection_method + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
+                      #control=list(optimizer="optim", optmethod="BFGS"))
+
+model_all4genebeta=rma.mv(yi=yi,V=vi,
+                      random=list(~1|study/observation,~1|species,~1|phylo),
+                      R=list(phylo=cmatrix3c),
+                      method="REML",mods=~detection_type + detection_method + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
+                      control=list(optimizer="optim", optmethod="BFGS"))
+
+model_all4gene_nomethod=rma.mv(yi=yi,V=vi,
+                      random=list(~1|study/observation,~1|species,~1|phylo),
+                      R=list(phylo=cmatrix1a),
+                      method="REML",mods=~detection_type + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prevalence_nona,
+                      control=list(optimizer="optim", optmethod="BFGS"))
+model_all4genealpha_nomethod=rma.mv(yi=yi,V=vi,
+                           random=list(~1|study/observation,~1|species,~1|phylo),
+                           R=list(phylo=cmatrix2b),
+                           method="REML",mods=~detection_type + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prevalence_alphaonly_nona,
+                           control=list(optimizer="optim", optmethod="BFGS"))
+
+model_all4genebeta_nomethod=rma.mv(yi=yi,V=vi,
+                          random=list(~1|study/observation,~1|species,~1|phylo),
+                          R=list(phylo=cmatrix3c),
+                          method="REML",mods=~detection_type + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prevalence_betaonly_nona,
+                          control=list(optimizer="optim", optmethod="BFGS"))
+
+summary(model_all4genebeta_nomethod)
+
 
 model_all5gene=rma.mv(yi=yi,V=vi,
                   random=list(~1|study/observation,~1|species,~1|phylo),
-                  R=list(phylo=cmatrix1),
+                  R=list(phylo=cmatrix1a),
                   method="ML",mods=~detection_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                   control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all6gene=rma.mv(yi=yi,V=vi,
                   random=list(~1|study/observation,~1|species,~1|phylo),
-                  R=list(phylo=cmatrix1),
+                  R=list(phylo=cmatrix1a),
                   method="ML",mods=~detection_type + single.multiple.PCR.method + tissue_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                   control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all7gene=rma.mv(yi=yi,V=vi,
                   random=list(~1|study/observation,~1|species,~1|phylo),
-                  R=list(phylo=cmatrix1),
+                  R=list(phylo=cmatrix1a),
                   method="ML",mods=~detection_type + single.multiple.PCR.method + euthanasia_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                   control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all8gene=rma.mv(yi=yi,V=vi,
                   random=list(~1|study/observation,~1|species,~1|phylo),
-                  R=list(phylo=cmatrix1),
+                  R=list(phylo=cmatrix1a),
                   method="ML",mods=~study_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                   control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all9gene=rma.mv(yi=yi,V=vi,
                   random=list(~1|study/observation,~1|species,~1|phylo),
-                  R=list(phylo=cmatrix1),
+                  R=list(phylo=cmatrix1a),
                   method="ML",mods=~study_type + single.multiple.PCR.method + sample_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                   control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all10gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix1a),
                    method="ML",mods=~detection_type + study_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all11gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix1a),
                    method="ML",mods=~detection_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_all12gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix1a),
                    method="ML",mods=~detection_type + single.multiple.PCR.method + sample_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 ###alpha cov only models w gene
 model_alpha1gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix2b),
                     method="ML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha2gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix2b),
                     method="ML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha3gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix2b),
                     method="ML",mods=~study_type + single.multiple.PCR.method + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha4gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix2b),
                     method="ML",mods=~detection_type + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha5gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix2b),
                     method="ML",mods=~detection_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha6gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix2b),
                     method="ML",mods=~detection_type + single.multiple.PCR.method + tissue_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha7gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix2b),
                     method="ML",mods=~detection_type + single.multiple.PCR.method + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha8gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix2b),
                     method="ML",mods=~study_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha9gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix2b),
                     method="ML",mods=~study_type + single.multiple.PCR.method + sample_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha10gene=rma.mv(yi=yi,V=vi,
                      random=list(~1|study/observation,~1|species,~1|phylo),
-                     R=list(phylo=cmatrix1),
+                     R=list(phylo=cmatrix2b),
                      method="ML",mods=~detection_type + study_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                      control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha11gene=rma.mv(yi=yi,V=vi,
                      random=list(~1|study/observation,~1|species,~1|phylo),
-                     R=list(phylo=cmatrix1),
+                     R=list(phylo=cmatrix2b),
                      method="ML",mods=~detection_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                      control=list(optimizer="optim", optmethod="BFGS"))
 
 model_alpha12gene=rma.mv(yi=yi,V=vi,
                      random=list(~1|study/observation,~1|species,~1|phylo),
-                     R=list(phylo=cmatrix1),
+                     R=list(phylo=cmatrix2b),
                      method="ML",mods=~detection_type + single.multiple.PCR.method + sample_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_alphaonly_nona,
                      control=list(optimizer="optim", optmethod="BFGS"))
 
 ###beta cov only models w gene
 model_beta1gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix3c),
                    method="ML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta2gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix3c),
                    method="ML",mods=~study_type + single.multiple.PCR.method + tissue_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta3gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix3c),
                    method="ML",mods=~study_type + single.multiple.PCR.method + euthanasia_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta4gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix3c),
                    method="ML",mods=~detection_type + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta5gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix3c),
                    method="ML",mods=~detection_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta6gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix3c),
                    method="ML",mods=~detection_type + single.multiple.PCR.method + tissue_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta7gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix3c),
                    method="ML",mods=~detection_type + single.multiple.PCR.method + euthanasia_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta8gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix3c),
                    method="ML",mods=~study_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta9gene=rma.mv(yi=yi,V=vi,
                    random=list(~1|study/observation,~1|species,~1|phylo),
-                   R=list(phylo=cmatrix1),
+                   R=list(phylo=cmatrix3c),
                    method="ML",mods=~study_type + single.multiple.PCR.method + sample_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                    control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta10gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix3c),
                     method="ML",mods=~detection_type + study_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta11gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix3c),
                     method="ML",mods=~detection_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
 
 model_beta12gene=rma.mv(yi=yi,V=vi,
                     random=list(~1|study/observation,~1|species,~1|phylo),
-                    R=list(phylo=cmatrix1),
+                    R=list(phylo=cmatrix3c),
                     method="ML",mods=~detection_type + single.multiple.PCR.method + sample_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified, data=set_infection_prev_betaonly_nona,
                     control=list(optimizer="optim", optmethod="BFGS"))
+
+
+## model comparison table
+mods_all=list(model_all1,model_all2,model_all3,model_all4,model_all5,model_all6,model_all7,model_all8,model_all9,model_all10,model_all11,model_all12,model_all1gene,model_all2gene,model_all3gene,model_all4gene,model_all6gene,model_all7gene,model_all8gene,model_all9gene,model_all10gene,model_all11gene,model_all12gene)
+mods_alpha=list(model_alpha1,model_alpha2,model_alpha3,model_alpha4,model_alpha5,model_alpha6,model_alpha7,model_alpha8,model_alpha9,model_alpha10,model_alpha11,model_alpha12,model_alpha1gene,model_alpha2gene,model_alpha3gene,model_alpha4gene,model_alpha5gene,model_alpha6gene,model_alpha7gene,model_alpha8gene,model_alpha9gene,model_alpha10gene,model_alpha11gene,model_alpha12gene)
+mods_beta=list(model_beta1,model_beta2,model_beta3,model_beta4,model_beta5,model_beta6,model_beta7,model_beta8,model_beta9,model_beta10,model_beta11,model_beta12,model_beta1gene,model_beta2gene,model_beta3gene,model_beta4gene,model_alpha5gene,model_beta6gene,model_beta7gene,model_beta8gene,model_beta9gene,model_beta10gene,model_beta11gene,model_beta12gene)
+
+## extract and save
+mdata=data.frame(k=sapply(mods_all,function(x) length(coef(x))), AICc=sapply(mods_all,AIC))
+mdata=mdata[order(mdata$AIC,decreasing=F),]
+mdata$delta=mdata$AIC-mdata$AIC[1]
+mdata$wi=MuMIn::Weights(mdata$AIC)
+
+mdata=data.frame(k=sapply(mods_alpha,function(x) length(coef(x))), AICc=sapply(mods_alpha,AIC))
+mdata=mdata[order(mdata$AIC,decreasing=F),]
+mdata$delta=mdata$AIC-mdata$AIC[1]
+mdata$wi=MuMIn::Weights(mdata$AIC)
+
+mdata=data.frame(k=sapply(mods_beta,function(x) length(coef(x))), AICc=sapply(mods_beta,AIC))
+mdata=mdata[order(mdata$AIC,decreasing=F),]
+mdata$delta=mdata$AIC-mdata$AIC[1]
+mdata$wi=MuMIn::Weights(mdata$AIC)
+AIC(model_beta10)
+
+#best all = model_all4
+mods=~detection_type + study_type + single.multiple.PCR.method + tissue_simplified + euthanasia_simplified + family + summer + winter + fall + spring
+#best alpha = model_alpha10
+mods=~detection_type + study_type + single.multiple.PCR.method + sample_simplified + euthanasia_simplified + family + summer + winter + fall + spring
+#best beta = model_beta6gene
+mods=~detection_type + single.multiple.PCR.method + tissue_simplified + detection_method + family + summer + winter + fall + spring + gene_targets_simplified
+
+
+
+
+#more alpha models
+
+
+#more beta models 
+
+
+
+
+
+
+
+
+
+
 
 
 library(plyr)
