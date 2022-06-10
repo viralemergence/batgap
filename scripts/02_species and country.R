@@ -1,7 +1,7 @@
 ## bat coronavirus gap analysis
 ## 02_species and country
 ## danbeck@ou.edu
-## last updated 42722
+## last updated 6922
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -550,7 +550,7 @@ pmax=10
 
 ## make base
 library(ggtree)
-base=ggtree(dtree,size=0.1)
+base=ggtree(dtree,size=0.05)
 base2=ggtree(stree,size=0.1,branch.length='none',layout="circular")
 
 ## binary tree
@@ -581,7 +581,7 @@ plot1=gg+
 plot1=gg+
   geom_tippoint(data=dtree,aes(colour=factor(binstudy),
                                alpha=factor(binstudy)),
-                shape=15,size=0.75)+
+                shape=15,size=0.5)+
   guides(colour=F,alpha=F)+
   scale_alpha_manual(values=c(0,1))+
   scale_colour_manual(values=c("white","black"))
