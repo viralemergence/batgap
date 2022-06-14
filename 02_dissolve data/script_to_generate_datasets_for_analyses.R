@@ -1,5 +1,5 @@
 #again, need tree + phylogeny
-#download tree and Upham phylogeny from github.com/viralemergence/batgap/01-generate_datacov
+#download tree and Upham phylogeny from github.com/viralemergence/batgap/01_data processing
 #tree: "MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre"
 tree <- read.nexus("MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre")
 #phylogeny: "taxonomy_mamPhy_5911species.csv"
@@ -17,12 +17,12 @@ tree <- keep.tip(tree,taxa$tiplabel)
 tree$tip.label=sapply(strsplit(tree$tip.label,'_'),function(x) paste(x[1],x[2],sep=' '))
 taxa$species=sapply(strsplit(taxa$tip,'_'),function(x) paste(x[1],x[2],sep=' '))
 
-#download datacov from https://github.com/viralemergence/datacov
-datacov <- read.csv("datacov.csv")
+#download data.csv from https://github.com/viralemergence/batgap
+data <- read.csv("data.csv")
 
 #remove genus-only/drop rows for analyses (trim dataset to only phylogeny) 
-setdiff(datacov$species_for_reader,tree$tip)
-dataset=datacov[datacov$species_for_reader%in%tree$tip.label,,]
+setdiff(data$species_for_reader,tree$tip)
+dataset=data[data$species_for_reader%in%tree$tip.label,,]
 dataset$species=factor(dataset$species_for_reader)
 dataset$studies=factor(dataset$title)
 
@@ -78,11 +78,11 @@ for(i in 2:1627) {
 set_infection_prev_betaonly <- cbind(set_infection_prev_betaonly, data_fam)
 
 #infection prevalence datasets
-write.csv(set_infection_prev,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_infection_prevalence.csv")
-write.csv(set_infection_prev_alphaonly,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_infection_prevalence_alphaonly.csv")
-write.csv(set_infection_prev_betaonly,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_infection_prevalence_betaonly.csv")
+write.csv(set_infection_prev,"~/Documents/GitHub/batgap/02_dissolve data/set_infection_prevalence.csv")
+write.csv(set_infection_prev_alphaonly,"~/Documents/GitHub/batgap/02_dissolve data/set_infection_prevalence_alphaonly.csv")
+write.csv(set_infection_prev_betaonly,"~/Documents/GitHub/batgap/02_dissolve data/set_infection_prevalence_betaonly.csv")
 
 #other analyses datasets
-write.csv(set_other,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_other.csv")
-write.csv(set_other_alphaonly,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_other_alphaonly.csv")
-write.csv(set_other_betaonly,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_other_betaonly.csv")
+write.csv(set_other,"~/Documents/GitHub/batgap/02_dissolve data/set_other.csv")
+write.csv(set_other_alphaonly,"~/Documents/GitHub/batgap/02_dissolve data/set_other_alphaonly.csv")
+write.csv(set_other_betaonly,"~/Documents/GitHub/batgap/02_dissolve data/set_other_betaonly.csv")
