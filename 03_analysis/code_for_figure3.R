@@ -1,4 +1,4 @@
-Code until line 185 is same as code_for_meta-analysis_models in https://github.com/viralemergence/batgap/blob/master/03_analysis/code_for_meta-analysis_models.R
+#Code until line 185 is same as code_for_meta-analysis_models in https://github.com/viralemergence/batgap/blob/master/03_analysis/code_for_meta-analysis_models.R
 
 ## libraries
 library(dplyr)
