@@ -15,3 +15,5 @@ The script produces the following datasets, which can all be found in the data r
 5) set_other.csv contains rows used in ***pooled-coronavirus genera analyses not based on prevalence proportion positive***
 6) set_other_alphaonly.csv contains rows used in ***alphacoronavirus-only analyses not based on prevalence proportion positive***
 7) set_other_betaonly.csv contains rows used in ***betacoronavirus-only analyses not based on prevalence proportion positive***
+
+coefficientplots.R (in data, scripts, and figure repositories) contains the script for generating the phylogenetically-controlled meta-analysis models from set_infection_prevalence, set_infection_prevalence_alphaonly, and set_infection_prevalence_betaonly. It also contains the script for generating figure 3 of the manuscript (coefficient plot).
