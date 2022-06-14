@@ -21,4 +21,4 @@ Directory https://github.com/viralemergence/batgap/tree/master/02-generate_datas
 
 Code to run phylogenetically-controlled meta-analyses using the above datasets is here: https://github.com/viralemergence/batgap/blob/master/03-generate_and_run_REML_models/code_for_meta-analysis-models
 
-https://github.com/viralemergence/batgap/blob/master/03a-generate-figure-3-coefficient-plot/code_for_figure_3 contains the script for generating the phylogenetically-controlled meta-analysis models (same code as above)in addition to the script to generate figure 3 of the manuscript (coefficient plot).
+https://github.com/viralemergence/batgap/blob/master/03a-generate-figure-3-coefficient-plot/code_for_figure_3 contains the script for generating the phylogenetically-controlled meta-analysis models (same code as above) in addition to the script to generate figure 3 of the manuscript (coefficient plot).
