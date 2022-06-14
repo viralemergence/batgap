@@ -14,7 +14,7 @@ library(reshape2)
 library(cowplot)
 
 ##set working directory 
-setwd("~/Documents/GitHub/batgap/00-preprocessing_and_cleaning")
+setwd("~/Documents/GitHub/batgap/01_data processing")
 
 ##Airtable as of April 29, 2022
 data <- read.csv("raw-airtable-preprocessing.csv")
