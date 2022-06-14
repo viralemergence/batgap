@@ -1,7 +1,7 @@
 ## bat coronavirus gap analysis
 ## 02_species and country
 ## danbeck@ou.edu
-## last updated 6922
+## last updated 61422
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -18,13 +18,13 @@ library(stringr)
 library(reshape2)
 
 ## load datasets for geographic and taxonomic analyses
-setwd("~/Desktop/batgap/data")
+setwd("~/Desktop/batgap/02_dissolve data")
 data_all=read.csv("set_other.csv")
 data_alpha=read.csv("set_other_alphaonly.csv")
 data_beta=read.csv("set_other_betaonly.csv")
 
 ## load in Upham phylogeny
-setwd("~/Desktop/batgap/phylos")
+setwd("~/Desktop/batgap/01_data processing")
 tree=read.nexus('MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre')
 
 ## load in taxonomy
@@ -90,7 +90,7 @@ adata=data.frame(sdata)
 rm(sdata)
 
 ## load georegion
-setwd("~/Desktop/batgap/data")
+setwd("~/Desktop/batgap/03_analysis")
 geo=read.csv("georegion.csv")
 
 ## standardize
@@ -156,10 +156,10 @@ s2=emmeans(mod2,list(pairwise~region),level=0.95,adjust="fdr",type="response")
 s3=emmeans(mod3,list(pairwise~region),level=0.95,adjust="fdr",type="response")
 
 ## export
-setwd("~/Desktop/batgap/supp tables")
-write.csv(data.frame(s1$`pairwise differences of region`),"Table SA.csv")
-write.csv(data.frame(s2$`pairwise differences of region`),"Table SB.csv")
-write.csv(data.frame(s3$`pairwise differences of region`),"Table SC.csv")
+setwd("~/Desktop/batgap/04_outputs")
+write.csv(data.frame(s1$`pairwise differences of region`),"Table S3.csv")
+write.csv(data.frame(s2$`pairwise differences of region`),"Table S4.csv")
+write.csv(data.frame(s3$`pairwise differences of region`),"Table S5.csv")
 
 ## merge with wdata
 cdata=dplyr::left_join(wdata,adata,by="country",copy=T)
@@ -189,8 +189,8 @@ p2=ggplot(cdata,aes(long,lat))+
                              barwidth = 15))
 
 ## combine
-setwd("~/Desktop/batgap/figures")
-png("geographic patterns effort.png",width=10,height=5,units="in",res=600)
+setwd("~/Desktop/batgap/04_outputs")
+png("Figure 1.png",width=10,height=5,units="in",res=600)
 p1+p2
 dev.off()
 
@@ -639,12 +639,12 @@ plot3=plot3+ggtitle(expression(paste("(c) ",log[10]("samples"))))
 
 ## patchwork and export
 library(patchwork)
-setwd("~/Desktop/batgap/figures")
-png("taxonomic patterns effort.png",width=6,height=6,units="in",res=600)
+setwd("~/Desktop/batgap/04_outputs")
+png("Figure 2.png",width=6,height=6,units="in",res=600)
 plot1|(plot2/plot3)+plot_layout(widths=c(2,1))
 dev.off()
 
 ## supp tables
-setwd("~/Desktop/batgap/supp tables")
-write.csv(nstudies_res,"Table SD.csv")
-write.csv(nsamples_res,"Table SE.csv")
+setwd("~/Desktop/batgap/04_outputs")
+write.csv(nstudies_res,"Table S6.csv")
+write.csv(nsamples_res,"Table S7.csv")
