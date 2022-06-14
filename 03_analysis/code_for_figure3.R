@@ -1,4 +1,4 @@
-Code until line 185 is same as code_for_meta-analysis_models in https://github.com/viralemergence/batgap/tree/master/03-generate_and_run_REML_models
+Code until line 185 is same as code_for_meta-analysis_models in https://github.com/viralemergence/batgap/blob/master/03_analysis/code_for_meta-analysis_models.R
 
 ## libraries
 library(dplyr)
@@ -13,7 +13,7 @@ library(cowplot)
 library(ggrepel)
 library(car)
 
-##load infection prevalence datasets from https://github.com/viralemergence/batgap/tree/master/02a-datasets_for_analyses
+##load infection prevalence datasets from https://github.com/viralemergence/batgap/tree/master/02_dissolve%20data
 set_infection_prevalence <- read.csv("set_infection_prevalence.csv")
 set_infection_prevalence_alphaonly <- read.csv("set_infection_prevalence_alphaonly.csv")
 set_infection_prevalence_betaonly <- read.csv("set_infection_prevalence_betaonly.csv")
