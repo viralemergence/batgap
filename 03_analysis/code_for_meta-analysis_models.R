@@ -1,4 +1,4 @@
-Again, need to download "MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre" and "taxonomy_mamPhy_5911species.csv" from https://github.com/viralemergence/batgap/tree/master/01-generate_datacov
+Again, need to download "MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre" and "taxonomy_mamPhy_5911species.csv" from https://github.com/viralemergence/batgap/blob/master/01_data%20processing/code_to_generate_data.csv.R
 
 ## libraries
 library(dplyr)
@@ -13,7 +13,7 @@ library(cowplot)
 library(ggrepel)
 library(car)
 
-##load infection prevalence datasets from https://github.com/viralemergence/batgap/tree/master/02a-datasets_for_analyses
+##load infection prevalence datasets from https://github.com/viralemergence/batgap/tree/master/02_dissolve%20data
 set_infection_prevalence <- read.csv("set_infection_prevalence.csv")
 set_infection_prevalence_alphaonly <- read.csv("set_infection_prevalence_alphaonly.csv")
 set_infection_prevalence_betaonly <- read.csv("set_infection_prevalence_betaonly.csv")
