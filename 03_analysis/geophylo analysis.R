@@ -646,5 +646,5 @@ dev.off()
 
 ## supp tables
 setwd("~/Desktop/batgap/04_outputs")
-write.csv(nstudies_res,"Table S6.csv")
-write.csv(nsamples_res,"Table S7.csv")
+write.csv(nstudies_res,"Table S8.csv")
+write.csv(nsamples_res,"Table S9.csv")
