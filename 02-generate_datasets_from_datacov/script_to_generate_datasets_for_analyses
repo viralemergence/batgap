@@ -78,11 +78,11 @@ for(i in 2:1627) {
 set_infection_prev_betaonly <- cbind(set_infection_prev_betaonly, data_fam)
 
 #infection prevalence datasets
-write.csv(set_infection_prev,"~/Documents/GitHub/batgap/03-datasets_for_analyses/set_infection_prevalence.csv")
-write.csv(set_infection_prev_alphaonly,"~/Documents/GitHub/batgap/03-datasets_for_analyses/set_infection_prevalence_alphaonly.csv")
-write.csv(set_infection_prev_betaonly,"~/Documents/GitHub/batgap/03-datasets_for_analyses/set_infection_prevalence_betaonly.csv")
+write.csv(set_infection_prev,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_infection_prevalence.csv")
+write.csv(set_infection_prev_alphaonly,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_infection_prevalence_alphaonly.csv")
+write.csv(set_infection_prev_betaonly,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_infection_prevalence_betaonly.csv")
 
 #other analyses datasets
-write.csv(set_other,"~/Documents/GitHub/batgap/03-datasets_for_analyses/set_other.csv")
-write.csv(set_other_alphaonly,"~/Documents/GitHub/batgap/03-datasets_for_analyses/set_other_alphaonly.csv")
-write.csv(set_other_betaonly,"~/Documents/GitHub/batgap/03-datasets_for_analyses/set_other_betaonly.csv")
+write.csv(set_other,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_other.csv")
+write.csv(set_other_alphaonly,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_other_alphaonly.csv")
+write.csv(set_other_betaonly,"~/Documents/GitHub/batgap/02a-datasets_for_analyses/set_other_betaonly.csv")
