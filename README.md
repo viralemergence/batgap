@@ -1,6 +1,6 @@
 ### Cohen _et al._, Sampling strategies and pre-pandemic surveillance gaps for bat coronaviruses
 
-This repository contains data and code to reproduce all analyses of bat coronavirus data. A public-facing version of this dataset with simplified fields is available in the (datacov)[https://github.com/viralemergence/datacov] repository.
+This repository contains data and code to reproduce all analyses of bat coronavirus data. A public-facing version of this dataset with simplified fields is available in the [datacov](https://github.com/viralemergence/datacov) repository.
 
 ```
 DIRECTORY
