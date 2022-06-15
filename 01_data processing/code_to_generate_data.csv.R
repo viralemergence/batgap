@@ -382,7 +382,7 @@ data$bat_species[which(data$spec==2)]
 
 #fix bats for dataset being given to reader (e.g. rows with only genus-level info are kept) - not for use in analyses
 data$species_for_reader=data$bat_species
-#species not in phylogeny, not enough info (e.g. Insectivorous bats) -> Drop 
+
 data$species_for_reader=revalue(data$species_for_reader,
                      c("Artibeus phaeotis"="Dermanura phaeotis",
                        "Artibeus literatus"="Artibeus lituratus",
