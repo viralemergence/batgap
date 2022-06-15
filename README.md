@@ -1,4 +1,6 @@
-### Code for: Cohen _et al._, Sampling strategies and pre-pandemic surveillance gaps for bat coronaviruses
+### Cohen _et al._, Sampling strategies and pre-pandemic surveillance gaps for bat coronaviruses
+
+This repository contains data and code to reproduce all analyses of bat coronavirus data. A public-facing version of this dataset with simplified fields is available in the (datacov)[https://github.com/viralemergence/datacov] repository.
 
 ```
 DIRECTORY
@@ -18,12 +20,12 @@ data.csv - the basic dataset
 |
 ├─ script_to_generate_datasets_for_analyses.R - breaks down data.csv into smaller files for sub-analyses
 |
-| # These three are used for prevalence analyses in code_for_meta-analysis_models.R
+| # These are used for prevalence analyses in code_for_meta-analysis_models.R
 ├─ set_infection_prevalence.csv  - all coronavirus records
 ├─ set_infection_prevalence_alphaonly.csv  - alphacoronavirus only
 ├─ set_infection_prevalence_betaonly.csv -  betacoronavirus only
 |
-| # These three are used in geophylo analysis.R and any descriptive statistics not dependent on proportion positive
+| # These are used in geophylo analysis.R and descriptive stats not dependent on proportion positive
 ├─ set_other.csv  - all coronavirus records
 ├─ set_other_alphaonly.csv - alphacoronavirus only
 └─ set_other_betaonly.csv -  betacoronavirus only 
@@ -35,5 +37,18 @@ data.csv - the basic dataset
 |
 ├─ geophylo analysis.R - runs phylofactor and generates the maps and tree figures
 └─ georegion.csv - geospatial metadata used for regional analyses 
+
+04_outputs
+|
+| # some additional files that become figures or supplement
+├─ Figure 1.png
+├─ Figure 2.png
+├─ Figure 3.png
+├─ Table S3.csv
+├─ Table S4.csv
+├─ Table S5.csv
+├─ Table S8.csv
+└─ Table S9.csv
 ```
+
 
