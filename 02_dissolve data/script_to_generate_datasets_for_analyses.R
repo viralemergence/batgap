@@ -51,7 +51,7 @@ set_infection_prev$species_char <- as.character(set_infection_prev$species)
 which(taxa$species==set_infection_prev$species_char[1])
 data_fam <- data.frame(family = taxa$fam[986])
 nrow(set_infection_prev)
-for(i in 2:2076) {
+for(i in 2:2077) {
   new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev$species_char[i])])
   data_fam <- rbind(data_fam, new_row)
 }
@@ -71,7 +71,7 @@ set_infection_prev_betaonly$species_char <- as.character(set_infection_prev_beta
 which(taxa$species==set_infection_prev_betaonly$species_char[1])
 data_fam <- data.frame(family = taxa$fam[986])
 nrow(set_infection_prev_betaonly)
-for(i in 2:1627) {
+for(i in 2:1628) {
   new_row <- data.frame(family = taxa$fam[which(taxa$species==set_infection_prev_betaonly$species_char[i])])
   data_fam <- rbind(data_fam, new_row)
 }
