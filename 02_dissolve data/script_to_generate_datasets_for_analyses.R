@@ -1,3 +1,5 @@
+library(ape)
+
 #again, need tree + phylogeny
 #download tree and Upham phylogeny from github.com/viralemergence/batgap/01_data processing
 #tree: "MamPhy_fullPosterior_BDvr_Completed_5911sp_topoCons_NDexp_MCC_v2_target.tre"
