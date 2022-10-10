@@ -29,9 +29,9 @@ dataset$species=factor(dataset$species_for_reader)
 dataset$studies=factor(dataset$title)
 
 ###datasets: 
-#1) infection prevalence analyses (antibody + IHC rows removed, flagged rows removed, coinfection rows removed) - all cov genera
-set_infection_prev <- dataset[-which(dataset$detection_method== "IHC" | dataset$detection_method=="antibody"),,]
-set_infection_prev <- set_infection_prev[which(set_infection_prev$Flag=="only use these two rows for prevalence estimates" | set_infection_prev$Flag==""),,]
+#1) infection prevalence analyses (IHC row removed, flagged rows removed, coinfection rows removed) - all cov genera
+set_infection_prev <- dataset[which(dataset$Flag=="only use these two rows for prevalence estimates" | dataset$Flag==""),,]
+set_infection_prev <- set_infection_prev[-which(set_infection_prev$detection_method=="IHC"),,]
 set_infection_prev <- set_infection_prev[-which(set_infection_prev$virus_genus_simplified== "coinfection"),,]
 
 #2) other analyses (five rows only for prevalence have been removed, coinfection rows removed) - all cov genera
@@ -49,6 +49,9 @@ set_other_betaonly <- set_other[c(which(set_other$virus_genus_simplified=="betac
 
 ##add column for bat family 
 #all genera
+library(stringr)
+which(word(taxa$species,1)=="Miniopterus")
+taxa$fam[which(word(taxa$species,1)=="Miniopterus")] <- "MINIOPTERIDAE"
 set_infection_prev$species_char <- as.character(set_infection_prev$species)
 which(taxa$species==set_infection_prev$species_char[1])
 data_fam <- data.frame(family = taxa$fam[986])
@@ -88,3 +91,5 @@ write.csv(set_infection_prev_betaonly,"~/Documents/GitHub/batgap/02_dissolve dat
 write.csv(set_other,"~/Documents/GitHub/batgap/02_dissolve data/set_other.csv")
 write.csv(set_other_alphaonly,"~/Documents/GitHub/batgap/02_dissolve data/set_other_alphaonly.csv")
 write.csv(set_other_betaonly,"~/Documents/GitHub/batgap/02_dissolve data/set_other_betaonly.csv")
+
+
