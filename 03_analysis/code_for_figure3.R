@@ -22,9 +22,9 @@ set_infection_prevalence_nona <- set_infection_prevalence[-which(is.na(set_infec
 set_infection_prevalence_alphaonly_nona <- set_infection_prevalence_alphaonly[-which(is.na(set_infection_prevalence_alphaonly$summer)),,]
 set_infection_prevalence_betaonly_nona <- set_infection_prevalence_betaonly[-which(is.na(set_infection_prevalence_betaonly$summer)),,]
 colnames(set_infection_prevalence_nona)
-set_infection_prevalence_nona <- set_infection_prevalence_nona[,c(1:59,68)]
-set_infection_prevalence_alphaonly_nona <- set_infection_prevalence_alphaonly_nona[,c(1:59,68)]
-set_infection_prevalence_betaonly_nona <- set_infection_prevalence_betaonly_nona[,c(1:59,68)]
+set_infection_prevalence_nona <- set_infection_prevalence_nona[,c(1:59,63)]
+set_infection_prevalence_alphaonly_nona <- set_infection_prevalence_alphaonly_nona[,c(1:59,63)]
+set_infection_prevalence_betaonly_nona <- set_infection_prevalence_betaonly_nona[,c(1:59,63)]
 
 #remove variables w/ less than 3 rows (i.e., liver-2, mystacinidae-1, noctilionidae-2): all data 
 nrow(set_infection_prevalence_nona)
@@ -103,7 +103,8 @@ taxa=taxa[taxa$ord=="CHIROPTERA",]
 taxa$tip=taxa$Species_Name
 taxa$tip <- as.character(taxa$tip)
 taxa$fam <- as.character(taxa$fam)
-
+which(substr(taxa$tip,1,11)=="Miniopterus")
+taxa$fam[which(substr(taxa$tip,1,11)=="Miniopterus")] <- "MINIOPTERIDAE"
 ## trim phylo to bats
 taxa$tiplabel <- as.character(taxa$tiplabel)
 tree <- keep.tip(tree,taxa$tiplabel)
@@ -190,12 +191,12 @@ global_betas_betacov=data.frame(beta=model_all4genebeta_nomethod$beta, ci.lb=mod
 global_betas_allcov$coefficient <- rownames(global_betas_allcov)
 global_betas_alphacov$coefficient <- rownames(global_betas_alphacov)
 global_betas_betacov$coefficient <- rownames(global_betas_betacov)
-global_betas_allcov$type <- "any coronavirus genus"
+global_betas_allcov$type <- "alphacoronavirus or betacoronavirus"
 global_betas_alphacov$type <- "alphacoronavirus only"
 global_betas_betacov$type <- "betacoronavirus only"
 global_betas <- rbind(global_betas_allcov, global_betas_alphacov, global_betas_betacov)
 global_betas$type <- as.factor(global_betas$type)
-global_betas$type <- factor(global_betas$type, levels=c("any coronavirus genus","alphacoronavirus only","betacoronavirus only"))
+global_betas$type <- factor(global_betas$type, levels=c("alphacoronavirus or betacoronavirus","alphacoronavirus only","betacoronavirus only"))
 
 unique(global_betas$coefficient)                                                                                      
 global_betas$coefficient[which(global_betas$coefficient=="intrcpt")] <- "intercept"
@@ -223,6 +224,7 @@ global_betas$coefficient[which(global_betas$coefficient=="familyPTEROPODIDAE")] 
 global_betas$coefficient[which(global_betas$coefficient=="familyRHINOLOPHIDAE")] <- "Rhinolophidae" 
 global_betas$coefficient[which(global_betas$coefficient=="familyRHINOPOMATIDAE")] <- "Rhinopomatidae"
 global_betas$coefficient[which(global_betas$coefficient=="familyVESPERTILIONIDAE")] <- "Vespertilionidae"
+global_betas$coefficient[which(global_betas$coefficient=="familyMINIOPTERIDAE")] <- "Miniopteridae"
 global_betas$coefficient[which(global_betas$coefficient=="summer")] <- "summer" 
 global_betas$coefficient[which(global_betas$coefficient=="winter")] <- "winter"  
 global_betas$coefficient[which(global_betas$coefficient=="fall")] <- "fall" 
@@ -230,13 +232,13 @@ global_betas$coefficient[which(global_betas$coefficient=="spring")] <- "spring"
 global_betas$coefficient[which(global_betas$coefficient=="gene_targets_simplifiedOther")] <- "Not RdRp" 
 global_betas$coefficient[which(global_betas$coefficient=="gene_targets_simplifiedRdRp_Other")] <- "RdRp and other target"
 global_betas$coefficient <- as.factor(global_betas$coefficient)
-global_betas$coefficient <- factor(global_betas$coefficient, levels=rev(c("intercept","repeat sampling","pooled sampling","longitudinal study", "multiple PCR runs", "blood or serum sample","intestinal sample","skin sample","lung or respiratory sample","urinary sample","oropharyngeal sample","pooled swabs/samples","pooled tissue","euthanasia used","Emballonuridae","Hipposideridae","Megadermatidae","Molossidae","Mormoopidae","Nycteridae","Phyllostomidae","Pteropodiae","Rhinolophidae","Rhinopomatidae","Vespertilionidae","fall","winter","spring","summer","Not RdRp","RdRp and other target")))
+global_betas$coefficient <- factor(global_betas$coefficient, levels=rev(c("intercept","repeat sampling","pooled sampling","longitudinal study", "multiple PCR runs", "blood or serum sample","intestinal sample","skin sample","lung or respiratory sample","urinary sample","oropharyngeal sample","pooled swabs/samples","pooled tissue","euthanasia used","Emballonuridae","Hipposideridae","Megadermatidae","Miniopteridae","Molossidae","Mormoopidae","Nycteridae","Phyllostomidae","Pteropodiae","Rhinolophidae","Rhinopomatidae","Vespertilionidae","fall","winter","spring","summer","Not RdRp","RdRp and other target")))
 
-global_betas$variable <- as.factor(c("intercept","sampling method", "sampling method", "study format","PCR type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","euthanasia use","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","sampling season","sampling season","sampling season","sampling season","gene target","gene target","intercept","sampling method", "sampling method", "study format","PCR type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","euthanasia use","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","sampling season","sampling season","sampling season","sampling season","gene target","gene target","intercept","sampling method", "sampling method", "study format","PCR type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","euthanasia use","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","sampling season","sampling season","sampling season","sampling season","gene target","gene target"))
+global_betas$variable <- as.factor(c("intercept","sampling method", "sampling method", "study format","PCR type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","euthanasia use","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","sampling season","sampling season","sampling season","sampling season","gene target","gene target","intercept","sampling method", "sampling method", "study format","PCR type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","euthanasia use","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","sampling season","sampling season","sampling season","sampling season","gene target","gene target","intercept","sampling method", "sampling method", "study format","PCR type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","tissue type","euthanasia use","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","bat family","sampling season","sampling season","sampling season","sampling season","gene target","gene target"))
 global_betas$variable <- factor(global_betas$variable, levels=c("intercept","sampling method","study format","PCR type","tissue type","euthanasia use","bat family","sampling season","gene target"))
 
 list <- c()
-for(i in 1:93){
+for(i in 1:96){
   if(global_betas$ci.lb[i] < 0 & global_betas$ci.ub[i] < 0){
     new_element <- "no"
     list <- c(list, new_element)
