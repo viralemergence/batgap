@@ -22,9 +22,9 @@ set_infection_prevalence_nona <- set_infection_prevalence[-which(is.na(set_infec
 set_infection_prevalence_alphaonly_nona <- set_infection_prevalence_alphaonly[-which(is.na(set_infection_prevalence_alphaonly$summer)),,]
 set_infection_prevalence_betaonly_nona <- set_infection_prevalence_betaonly[-which(is.na(set_infection_prevalence_betaonly$summer)),,]
 colnames(set_infection_prevalence_nona)
-set_infection_prevalence_nona <- set_infection_prevalence_nona[,c(1:59,68)]
-set_infection_prevalence_alphaonly_nona <- set_infection_prevalence_alphaonly_nona[,c(1:59,68)]
-set_infection_prevalence_betaonly_nona <- set_infection_prevalence_betaonly_nona[,c(1:59,68)]
+set_infection_prevalence_nona <- set_infection_prevalence_nona[,c(1:59,63)]
+set_infection_prevalence_alphaonly_nona <- set_infection_prevalence_alphaonly_nona[,c(1:59,63)]
+set_infection_prevalence_betaonly_nona <- set_infection_prevalence_betaonly_nona[,c(1:59,63)]
 
 #remove variables w/ less than 3 rows (i.e., liver-2, mystacinidae-1, noctilionidae-2): all data 
 nrow(set_infection_prevalence_nona)
@@ -103,7 +103,8 @@ taxa=taxa[taxa$ord=="CHIROPTERA",]
 taxa$tip=taxa$Species_Name
 taxa$tip <- as.character(taxa$tip)
 taxa$fam <- as.character(taxa$fam)
-
+which(substr(taxa$tip,1,11)=="Miniopterus")
+taxa$fam[which(substr(taxa$tip,1,11)=="Miniopterus")] <- "MINIOPTERIDAE"
 ## trim phylo to bats
 taxa$tiplabel <- as.character(taxa$tiplabel)
 tree <- keep.tip(tree,taxa$tiplabel)
