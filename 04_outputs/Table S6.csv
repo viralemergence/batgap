@@ -1,4 +1,4 @@
-﻿globalregion,number_of_studies_alphaorbeta,number_of_samples_analyzed_alphaorbeta,percentage_of_dataset_alphaorbeta,number_of_studies_alphaonly,number_of_samples_analyzed_alphaonly,percentage_of_dataset_alphaonly,number_of_studies_betaonly,number_of_samples_analyzed_betaonly,percentage_of_dataset_betaonly
+﻿global region,number_of_studies_alphaorbeta,number_of_samples_analyzed_alphaorbeta,percentage_of_dataset_alphaorbeta,number_of_studies_alphaonly,number_of_samples_analyzed_alphaonly,percentage_of_dataset_alphaonly,number_of_studies_betaonly,number_of_samples_analyzed_betaonly,percentage_of_dataset_betaonly
 Africa,17,15808,17.7,11,3863,15.1,14,2894,15.7
 Americas,13,6896,7.7,12,4238,16.6,4,1034,5.6
 Asia,56,55917,62.4,34,12242,47.9,41,13225,71.8
