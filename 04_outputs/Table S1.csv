@@ -1,0 +1,7 @@
+﻿Viral genus (as reported by study),num_nonzero_rows,num_zero_rows,included_in_alpha_and_beta_model,included_in_alphaonly_model,included_in_betaonly_model
+alphacoronavirus prevalence (explicit),384,20,y,y,n
+betacoronavirus prevalence (explicit),236,26,y,n,y
+genus unspecified or unresolved,45,1366,y,0,0
+,,,,,
+"(incl. if tests noted to include alphas and betas, but not specific, or if general sampling noted to include alpha and/or beta but not reported as proportion of sample)",,,,,
+coinfection of any kind,14,0,n,n,n
