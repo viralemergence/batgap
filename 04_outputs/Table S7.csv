@@ -1,4 +1,4 @@
-﻿globalregion_country,number_of_studies_alphaorbeta,number_of_samples_analyzed_alphaorbeta,percentage_of_dataset_alphaorbeta,number_of_studies_alphaonly,number_of_samples_analyzed_alphaonly,percentage_of_dataset_alphaonly,number_of_studies_betaonly,number_of_samples_analyzed_betaonly,percentage_of_dataset_betaonly,,,,,,,,,,,
+﻿global region_country,number_of_studies_alphaorbeta,number_of_samples_analyzed_alphaorbeta,percentage_of_dataset_alphaorbeta,number_of_studies_alphaonly,number_of_samples_analyzed_alphaonly,percentage_of_dataset_alphaonly,number_of_studies_betaonly,number_of_samples_analyzed_betaonly,percentage_of_dataset_betaonly,,,,,,,,,,,
 Africa_Egypt,2,1507,1.68,0,0,0,2,1425,7.73,,,,,,,,,,,
 Africa_Gabon,1,1123,1.25,1,158,0.62,1,16,0.09,,,,,,,,,,,
 Africa_Ghana,3,7221,8.06,2,1904,7.45,2,225,1.22,,,,,,,,,,,
