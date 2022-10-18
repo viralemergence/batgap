@@ -1,7 +1,7 @@
 ## bat coronavirus gap analysis
-## 02_species and country
+## geographic and taxonomic patterns
 ## danbeck@ou.edu
-## last updated 61422
+## last updated 101722
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -16,6 +16,7 @@ library(caper)
 library(viridis)
 library(stringr)
 library(reshape2)
+library(patchwork)
 
 ## load datasets for geographic and taxonomic analyses
 setwd("~/Desktop/batgap/02_dissolve data")
@@ -214,7 +215,7 @@ sdata=data.frame(studies=sdata,
                  species=unique(data_all$species))
 
 ## save
-s_all=sdata ## 363 species
+s_all=sdata ## 342 species
 
 ## repeat for alpha
 sdata=sapply(unique(data_alpha$species),function(x){
@@ -474,7 +475,7 @@ set.seed(1)
 nsamples_pf=gpf(Data=sdata$data,tree=sdata$phy,
                 frmla.phylo=sample~phylo,
                 family=poisson,
-                algorithm='phylo',nfactors=24,
+                algorithm='phylo',nfactors=40,
                 min.group.size = 10)
 
 ## summarize
