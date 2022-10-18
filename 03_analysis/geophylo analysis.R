@@ -547,7 +547,7 @@ cadd=function(gg,pf,pmax){
 }
 
 ## state pmax
-pmax=10
+pmax=24
 
 ## make base
 library(ggtree)
