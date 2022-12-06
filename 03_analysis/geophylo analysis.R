@@ -299,6 +299,28 @@ sdata$binstudy_beta=ifelse(sdata$studies_beta==0,0,1)
 taxa=taxa[c("Species_Name","tiplabel","gen","fam","clade","tip","species")]
 sdata=merge(sdata,taxa,by="species")
 
+## tally family sampling
+sdata2=sdata[sdata$binstudy==1,]
+f1=table(sdata2$fam)
+f2=table(sdata$fam)
+
+## reorganize
+f1=data.frame(f1)
+f2=data.frame(f2)
+names(f1)=c("fam","sampled")
+names(f2)=c("fam","total")
+fdata=merge(f2,f1,by="fam",all.x=T)
+rm(f1,f2)
+
+## fix NA
+fdata$sampled=ifelse(is.na(fdata$sampled),0,fdata$sampled)
+
+## check family coverage
+table(fdata$sampled>0)
+
+## check species coverage
+sum(fdata$sampled)/sum(fdata$total)
+
 ## merge
 sdata$tip=sdata$species
 cdata=comparative.data(phy=tree,data=sdata,names.col=tip,vcv=T,na.omit=F,warn.dropped=T)
