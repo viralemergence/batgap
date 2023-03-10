@@ -16,7 +16,7 @@ library(cowplot)
 ##set working directory 
 setwd("~/Documents/GitHub/batgap/01_data processing")
 
-##Airtable as of October 10, 2022
+##Airtable as of March 10, 2023
 data <- read.csv("raw-airtable-preprocessing.csv")
 
 #add column with simplified tissues
@@ -40,6 +40,7 @@ data$tissue_simplified<-revalue(data$tissue_simplified,
                                   "alimentary specimen"="faecal, rectal, or anal",
                                   "respiratory specimen"="lung or respiratory",
                                   "faeces or urine swab"="pooled swabs/samples",
+                                  "faeces or urine or oral swab or intestine"="pooled swabs/samples",
                                   "urine swab"="urinary",
                                   "faecal and/or throat sample"="pooled swabs/samples",
                                   "rectal/oral swab,serum"="pooled swabs/samples",
@@ -94,6 +95,7 @@ data$sample_simplified<-revalue(data$sample_simplified,
                                   "faeces"="faeces",
                                   "liver"="tissue",
                                   "faeces/anal swab"="pooled",
+                                  "faeces or urine or oral swab or intestine"="pooled",
                                   "rectal/oral swab"="swab",
                                   "serum"="sera",
                                   "faecal swab"="swab",
