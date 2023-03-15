@@ -79,6 +79,10 @@ set_infection_prevalence_nona$gene_targets_simplified <- factor(set_infection_pr
 set_infection_prevalence_alphaonly_nona$gene_targets_simplified <- factor(set_infection_prevalence_alphaonly_nona$gene_targets_simplified, levels=c("RdRp","Other","RdRp_Other"))
 set_infection_prevalence_betaonly_nona$gene_targets_simplified <- factor(set_infection_prevalence_betaonly_nona$gene_targets_simplified, levels=c("RdRp","Other","RdRp_Other"))
 
+write.csv(set_infection_prevalence_nona,"~/Documents/GitHub/batgap/03_analysis/set_infection_prevalence_nona.csv")
+write.csv(set_infection_prevalence_alphaonly_nona,"~/Documents/GitHub/batgap/03_analysis/set_infection_prevalence_alphaonly_nona.csv")
+write.csv(set_infection_prevalence_betaonly_nona,"~/Documents/GitHub/batgap/03_analysis/set_infection_prevalence_betaonly_nona.csv")
+
 ## function for I2 for rma.mv
 i2=function(model){
   
