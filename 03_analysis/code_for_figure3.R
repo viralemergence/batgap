@@ -1,4 +1,4 @@
-#Code until line 185 is same as code_for_meta-analysis_models in https://github.com/viralemergence/batgap/blob/master/03_analysis/code_for_meta-analysis_models.R
+#Code until line 188 is same as code_for_meta-analysis_models in https://github.com/viralemergence/batgap/blob/master/03_analysis/code_for_meta-analysis_models.R
 
 ## libraries
 library(dplyr)
@@ -78,6 +78,10 @@ set_infection_prevalence_betaonly_nona$gene_targets_simplified <- as.factor(set_
 set_infection_prevalence_nona$gene_targets_simplified <- factor(set_infection_prevalence_nona$gene_targets_simplified, levels=c("RdRp","Other","RdRp_Other"))
 set_infection_prevalence_alphaonly_nona$gene_targets_simplified <- factor(set_infection_prevalence_alphaonly_nona$gene_targets_simplified, levels=c("RdRp","Other","RdRp_Other"))
 set_infection_prevalence_betaonly_nona$gene_targets_simplified <- factor(set_infection_prevalence_betaonly_nona$gene_targets_simplified, levels=c("RdRp","Other","RdRp_Other"))
+
+write.csv(set_infection_prevalence_nona,"~/Documents/GitHub/batgap/03_analysis/set_infection_prevalence_nona.csv")
+write.csv(set_infection_prevalence_alphaonly_nona,"~/Documents/GitHub/batgap/03_analysis/set_infection_prevalence_alphaonly_nona.csv")
+write.csv(set_infection_prevalence_betaonly_nona,"~/Documents/GitHub/batgap/03_analysis/set_infection_prevalence_betaonly_nona.csv")
 
 ## function for I2 for rma.mv
 i2=function(model){
