@@ -1,7 +1,7 @@
 ## bat coronavirus gap analysis
 ## geographic and taxonomic patterns
 ## danbeck@ou.edu
-## last updated 101722
+## last updated 031723
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -191,7 +191,7 @@ p2=ggplot(cdata,aes(long,lat))+
 
 ## combine
 setwd("~/Desktop/batgap/04_outputs")
-png("Figure 1.png",width=10,height=5,units="in",res=600)
+png("Figure 2.png",width=10,height=5,units="in",res=600)
 p1+p2
 dev.off()
 
@@ -215,7 +215,7 @@ sdata=data.frame(studies=sdata,
                  species=unique(data_all$species))
 
 ## save
-s_all=sdata ## 342 species
+s_all=sdata ## 343 species
 
 ## repeat for alpha
 sdata=sapply(unique(data_alpha$species),function(x){
@@ -337,6 +337,7 @@ sdata=cdata[cdata$data$binstudy==1,]
 ## D statistic on sampled/not sampled
 set.seed(1)
 dstat=phylo.d(data=cdata,binvar=binstudy,permut=1000)
+dstat
 
 ## number of studies and number of bats
 hist(log10(sdata$data$studies))
@@ -350,8 +351,8 @@ sdata$data$ltested=log10(sdata$data$tested)
 range(sdata$data$studies)
 
 ## pagel's lambda
-pmod1=pgls(lstudies~1,data=sdata,lambda="ML")
-pmod2=pgls(ltested~1,data=sdata,lambda="ML")
+pmod1=pgls(lstudies~1,data=sdata,lambda="ML") ## lambda = 0.02
+pmod2=pgls(ltested~1,data=sdata,lambda="ML") ## lambda = 0.02
 
 ## summarize
 summary(pmod1)
@@ -663,7 +664,7 @@ plot3=plot3+ggtitle(expression(paste("(c) ",log[10]("samples"))))
 ## patchwork and export
 library(patchwork)
 setwd("~/Desktop/batgap/04_outputs")
-png("Figure 2.png",width=6,height=6,units="in",res=600)
+png("Figure 3.png",width=6,height=6,units="in",res=600)
 plot1|(plot2/plot3)+plot_layout(widths=c(2,1))
 dev.off()
 
