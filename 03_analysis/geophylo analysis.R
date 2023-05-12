@@ -1,7 +1,7 @@
 ## bat coronavirus gap analysis
 ## geographic and taxonomic patterns
 ## danbeck@ou.edu
-## last updated 031723
+## last updated 051223
 
 ## clean environment & plots
 rm(list=ls()) 
@@ -352,7 +352,7 @@ range(sdata$data$studies)
 
 ## pagel's lambda
 pmod1=pgls(lstudies~1,data=sdata,lambda="ML") ## lambda = 0.02
-pmod2=pgls(ltested~1,data=sdata,lambda="ML") ## lambda = 0.02
+pmod2=pgls(ltested~1,data=sdata,lambda="ML") ## lambda = 0.27
 
 ## summarize
 summary(pmod1)
@@ -396,7 +396,8 @@ library(stringr)
 pfsum=function(pf){
   
   ## get formula
-  chars=as.character(pf$frmla.phylo)[-1]
+  chars=as.character(pf$frmla.phylo)
+  chars=strsplit(chars," ")[[1]]
   
   ## response
   resp=chars[1]
@@ -407,10 +408,7 @@ pfsum=function(pf){
   
   ## holm
   hp=HolmProcedure(pf)
-  
-  ## save model
-  model=chars[2]
-  
+
   ## set key
   setkey(pf$Data,'Species')
   
@@ -562,7 +560,7 @@ cadd=function(gg,pf,pmax){
                         label = result$factor[i], 
                         offset = 10, 
                         offset.text = 6,
-                        fontsize=2.5)
+                        fontsize=2)
       
     }
   }
@@ -637,7 +635,57 @@ plot2=gg+
 plot2=plot2+ggtitle(expression(paste("(b) ",log[10]("studies"))))
 
 ## number of samples
-gg=cadd(base2,nsamples_pf,pmax)
+#gg=cadd(base2,nsamples_pf,pmax)
+
+## manual
+result=pfsum(nsamples_pf)$results
+
+## trim to first x
+x=19
+result1=result[1:x,]
+result2=result[(x+1):24,]
+
+## set gg
+gg=base2
+
+## set tree
+for(i in 1:nrow(result1)){
+  
+  ## highlight clade
+  gg=gg+
+    geom_hilight(node=result1$node[i],
+                 alpha=0.25,
+                 fill=ifelse(result1$clade>
+                               result1$other,pcols[2],pcols[1])[i])+
+    
+    ## add label
+    geom_cladelabel(node = result1$node[i], 
+                    label = result1$factor[i], 
+                    offset = 10, 
+                    offset.text = 6,
+                    fontsize=2)
+  
+}
+
+## next iteration
+for(i in 1:nrow(result2)){
+  
+  ## highlight clade
+  gg=gg+
+    geom_hilight(node=result2$node[i],
+                 alpha=0.25,
+                 fill=ifelse(result2$clade>
+                               result2$other,pcols[2],pcols[1])[i])+
+    
+    ## add label
+    geom_cladelabel(node = result2$node[i], 
+                    label = result2$factor[i], 
+                    offset = 10, 
+                    offset.text = 6,
+                    hjust=0,  vjust=-1,
+                    fontsize=2)
+  
+}
 
 ## get tree data
 tdata=base2$data
